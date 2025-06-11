@@ -18,14 +18,73 @@
 
 from .global_variables import *
 from dotenv import load_dotenv # For loading user configuration
+from datetime import datetime
 import os
+
+# ---[ Logging ]--- #
+if debug:
+    import logging
+    import os
+    from datetime import datetime
+
+    # Generate Log directory
+    os.makedirs("logfiles", exist_ok=True)
+
+    # Generate log filename using current datetime
+    log_filename = datetime.now().strftime("logfiles/%Y-%m-%d_%H-%M-%S.log")
+
+    # Color formatter for console
+    class ColorFormatter(logging.Formatter):
+        def format(self, record):
+            record.asctime = f"\033[34m{self.formatTime(record, self.datefmt)}\033[0m"
+            return f"[{record.asctime}] {record.getMessage()}"
+
+    # Plain formatter for logfile
+    file_formatter = logging.Formatter("[%(asctime)s] %(message)s", "%Y-%m-%d %H:%M:%S")
+
+    # Handlers
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(ColorFormatter(datefmt="%Y-%m-%d %H:%M:%S"))
+
+    file_handler = logging.FileHandler(log_filename, "a")
+    file_handler.setFormatter(file_formatter)
+
+    # Configure logger
+    logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler])
 
 # ---[ Definitions ]--- #
 
-# Debug printing
+def info(*msg, plain: str = None) -> None:
+    """
+    Logs both color (to console) and plain (to logfile).
+    """
+    logger = logging.getLogger()
+    message_colored = " ".join(str(m) for m in msg)
+    message_plain = plain or message_colored
+
+    # Create log record
+    record = logging.LogRecord(
+        name=logger.name,
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=0,
+        msg=message_plain,
+        args=(),
+        exc_info=None,
+    )
+
+    # Send to file (handler 1)
+    logger.handlers[1].handle(record)
+
+    # Override message with colored one for console
+    record.msg = message_colored
+    logger.handlers[0].handle(record)
+
 def dbg(*msg) -> None:
-  if debug:
-    print("\033[31m[Debug]\033[32m", *msg, "\033[0m")
+    if debug:
+        plain = " ".join(str(m) for m in msg)
+        color_msg = f"\033[31m[Debug]\033[32m {plain} \033[0m"
+        info(color_msg, plain=f"[Debug] {plain}")
 
 # Quit
 def quit(return_code: int) -> None:
