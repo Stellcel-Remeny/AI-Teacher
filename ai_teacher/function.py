@@ -18,6 +18,7 @@
 
 from .global_variables import *
 from dotenv import load_dotenv # For loading user configuration
+import os
 
 # ---[ Definitions ]--- #
 
@@ -54,12 +55,6 @@ def init() -> None:
     dbg("Clearing screen")
     clear_screen()
     dbg("Press CTRL-C at anytime to quit.\n")
-    
-    # Create settings.env if it doesn't exist
-    if not os.path.exists(user_settings_file):
-        dbg("Creating user settings file:", user_settings_file)
-        with open(user_settings_file, 'w') as f:
-            f.write("# User settings for AI Teacher\n")
 
     #  --( Update Version String )--  #
     BuildNumber = update_build_number(DefaultBuildNumber, BuildNumberFile)
@@ -70,6 +65,15 @@ def init() -> None:
     print("AI Teacher")
     print("Version:", str(version) + "-\"" + codename + "\"")
     print("You have currently ran this script", BuildNumber, "times.\n")
+
+    # Make folders
+    create_folders()
+
+    # Create settings.env if it doesn't exist
+    if not os.path.exists(user_settings_file):
+        dbg("Creating user settings file:", user_settings_file)
+        with open(user_settings_file, 'w') as f:
+            f.write("# User settings for AI Teacher\n")
 
     # Load user settings into memory
     dbg("Loading user settings...")
@@ -169,4 +173,19 @@ def license(LICENSE_ACCEPTED: str) -> None:
             break
         elif answer == 'n':
             print("Closing due to user unagreement...")
+            quit(1)
+
+# Creates folders
+def create_folders() -> None:
+    dbg("Making folders...")
+    # Read the folder names from app_stuff/folders.txt
+    with open('app_stuff/folders.txt', 'r', encoding='utf-8') as file:
+        folder_names = [line.strip() for line in file if line.strip()]
+
+    # Create each folder
+    for folder in folder_names:
+        try:
+            os.makedirs(folder, exist_ok=True)  # exist_ok=True avoids error if folder exists
+        except Exception as e:
+            print(f"Failed to create directory '{folder}': {e}")
             quit(1)
