@@ -1,0 +1,4 @@
+python-dotenv
+huggingface_hub
+gtts
+SpeechRecognition

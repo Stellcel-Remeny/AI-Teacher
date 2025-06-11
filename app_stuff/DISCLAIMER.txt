@@ -1,0 +1,9 @@
+DISCLAIMER
+----------
+
+This software is provided "as is" without any warranty.
+It uses an external AI API that Remeny Corporation does not control.
+No personally identifiable information is collected by us.
+You are responsible for complying with the AI API provider’s terms.
+This software is licensed under GNU GPL v3.
+Remeny is not liable for any damages from using this software.
