@@ -17,6 +17,7 @@
 #
 
 from .global_variables import *
+from ai_teacher import gui # For GUI related functions
 from dotenv import load_dotenv # For loading user configuration
 from datetime import datetime
 import os
@@ -87,10 +88,16 @@ def dbg(*msg) -> None:
         info(color_msg, plain=f"[Debug] {plain}")
 
 # Quit
-def quit(return_code: int) -> None:
+def quit(return_code: int, text: str = "") -> None:
     # Get BuildNumber
     with open(BuildNumberFile, "r") as count_content:
         BuildNumber = int(count_content.read())
+
+    # Display error dialog if return_code != 0:
+    if return_code != 0:
+        dbg("ERROR! RETURN CODE:", return_code)
+        print(f"An error occurred: {text}")
+        gui.error(text)
 
     # Print exit message
     dbg("Quitting with return code", return_code)
@@ -139,7 +146,7 @@ def init() -> None:
     load_dotenv(user_settings_file)
 
     # Make them agree to stuff
-    disclaimer(os.getenv("DISCLAIMER_ACCEPTED", "false").lower(), "app_stuff/DISCLAIMER.txt")
+    disclaimer(os.getenv("DISCLAIMER_ACCEPTED", "false").lower(), "resources/DISCLAIMER.txt")
     license(os.getenv("LICENSE_ACCEPTED", "false").lower())
 
 # Updates build number
@@ -237,8 +244,8 @@ def license(LICENSE_ACCEPTED: str) -> None:
 # Creates folders
 def create_folders() -> None:
     dbg("Making folders...")
-    # Read the folder names from app_stuff/folders.txt
-    with open('app_stuff/folders.txt', 'r', encoding='utf-8') as file:
+    # Read the folder names from resources/folders.txt
+    with open('resources/folders.txt', 'r', encoding='utf-8') as file:
         folder_names = [line.strip() for line in file if line.strip()]
 
     # Create each folder

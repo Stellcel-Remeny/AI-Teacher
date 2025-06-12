@@ -26,7 +26,7 @@ import platform
 init_time: int = time.time()
 init_time_formatted: datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-BuildNumberFile: str = "./app_stuff/build.txt" # File that holds how much builds have passed
+BuildNumberFile: str = "./resources/build.txt" # File that holds how much builds have passed
 user_settings_file: str = "./data/settings.env" # Environmental file for user configuration
 
 development: bool = True
