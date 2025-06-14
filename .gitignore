@@ -1,5 +1,5 @@
 __pycache__
-TEMPORARY.py
-data
-logfiles
+source/data
+source/logfiles
 .vscode
+temp
