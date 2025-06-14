@@ -1,5 +1,5 @@
 #
-# This python file deals with anything camera related that doesn't involve GUI directly.
+# Camera backend stuff
 # Copyright (C) 2025 Remeny
 #
 
@@ -7,17 +7,19 @@
 from ai_teacher import function as f
 from ai_teacher.global_variables import *
 from PIL import Image, ImageTk
+from typing import Union
 import cv2
 
-def init(width: int = 640, height: int = 480) -> "cv2.VideoCapture":
+def init(camera_index: int, width: int = 640, height: int = 480) -> Union[bool, cv2.VideoCapture]:
     """
     Initialize the video capturer.
     """
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(camera_index)
     
     if check_camera(camera) is False:
         f.dbg(f"Error: Could not open camera: {camera}")
-        f.quit(1, "Camera initialization failed.")
+        f.dbg(f"Camera index {camera_index} couldn't be opened.")
+        return False
     
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -33,10 +35,7 @@ def list_cameras() -> list:
     devices = graph.get_input_devices()
     cameras = []
     for i, name in enumerate(devices):
-        current_camera = cv2.VideoCapture(i)
-        if check_camera(current_camera):
-            cameras.append((i, name))
-        current_camera.release()
+        cameras.append((i, name))
     
     f.dbg(f"Available cameras: {cameras}")
     return cameras
