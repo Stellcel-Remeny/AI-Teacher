@@ -1,13 +1,13 @@
 #
-# This python file deals with anything camera related
+# This python file deals with anything camera related that doesn't involve GUI directly.
 # Copyright (C) 2025 Remeny
 #
 
 # ---[ Libraries ]--- #
 from ai_teacher import function as f
 from ai_teacher.global_variables import *
-import cv2
 from PIL import Image, ImageTk
+import cv2
 
 def init(width: int = 640, height: int = 480) -> "cv2.VideoCapture":
     """
@@ -23,6 +23,23 @@ def init(width: int = 640, height: int = 480) -> "cv2.VideoCapture":
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     f.dbg(f"Camera initialized with resolution: {width}x{height}")
     return camera
+
+def list_cameras() -> list:
+    """
+    List available cameras.
+    """
+    from pygrabber.dshow_graph import FilterGraph
+    graph = FilterGraph()
+    devices = graph.get_input_devices()
+    cameras = []
+    for i, name in enumerate(devices):
+        current_camera = cv2.VideoCapture(i)
+        if check_camera(current_camera):
+            cameras.append((i, name))
+        current_camera.release()
+    
+    f.dbg(f"Available cameras: {cameras}")
+    return cameras
 
 def check_camera(camera: "cv2.VideoCapture") -> bool:
     """

@@ -4,3 +4,5 @@ gtts
 SpeechRecognition
 opencv-python
 pillow
+customtkinter
+pygrabber
