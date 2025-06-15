@@ -43,14 +43,14 @@ from ai_teacher.global_variables import *
 import tkinter as tk
 from ai_teacher import gui
 # For Camera
-from win_resources import camera
+from win_resources.camera import cam_init
 
 # ---[ Main Initialization ]--- #
 def main():
     f.init()
     # Window initialization
     win = gui.init() # Our main application window
-    camera.init(win)  # Initialize the camera
+    cam_init(win)  # Initialize the camera
     win.mainloop()
     f.dbg("Window is closed.")
     f.quit(0)
