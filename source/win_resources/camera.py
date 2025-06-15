@@ -39,7 +39,10 @@ def cam_init(win: "gui.mainapp") -> None:
     text1.grid(pady=(0, 5))  # Add some space below the text
     
     add_camera_preview(win.main)
+    text1.configure(text="Select a camera from the dropdown above to start.")
     add_capture_info(win.main)
+    
+    f.dbg("Waiting for camera selection...")
     
     win.root.mainloop()
 
@@ -71,10 +74,12 @@ def add_camera_selector(main: "ctk.CTkFrame") -> None:
         width=210,
         command=lambda selected: change_selected_camera(frame2, camera_names.index(selected), selected)
     )
+    combobox_1.set("")  # Set to empty string initially
     combobox_1.grid(row=0, column=1, sticky="w", padx=(0, 10), pady=6)
 
 def change_selected_camera(frame: "ctk.CTkFrame", camera_index: int, selected_camera: str) -> None:
-    global cam, frame_update_id # Use a global variable to store the camera instance
+    global cam, frame_update_id, button1 # Use a global variable to store the camera instance
+    button1.configure(state="normal")  # Enable the capture button
     
     f.dbg(f"Selecting camera: {selected_camera} at index {camera_index}")
     
@@ -154,10 +159,11 @@ def add_capture_info(frame: "ctk.CTkFrame") -> None:
     button1 = ctk.CTkButton(
         master=frame,
         text="Capture",
+        state="disabled",
         command=lambda: f.dbg("Capture button pressed - implement capture logic here")
     )
     button1.grid(pady=(0, 20))  # Add some space below the button
-    f.dbg("Capture button added to the window.")
+    f.dbg(f"Capture button added to the frame: {frame}")
     
     text2 = ctk.CTkLabel(
         master=frame,
