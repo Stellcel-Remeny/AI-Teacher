@@ -8,25 +8,26 @@ from ai_teacher import function as f
 import customtkinter as ctk
 from tkinter import messagebox
 
-def init(title: str = "Remeny AI Teacher", width: int = 800, height: int = 600) -> "ctk.CTk":
+class mainapp:
     """
-    Initialize a window
+    Main application class for Remeny AI Teacher GUI.
+    This class is responsible for initializing the main window.
     """
-    ctk.set_appearance_mode("system")
-    win = ctk.CTk()
-    win.geometry(f"{width}x{height}")
-    win.iconbitmap("resources/icon.ico")
-    win.resizable(True, True)
-    return reinit(win, title)
-
-def reinit(win: "ctk.CTk", title: str = "Remeny AI Teacher") -> "ctk.CTk":
-    """
-    Reinitialize a window
-    """
-    clear_window(win)
-    win.title(title)
-    f.dbg(f"Window is customized: title = '{title}'")
-    return win
+    def __init__(self, title: str = "Remeny AI Teacher", width: int = 800, height: int = 600):
+        # basic stuff
+        self.root = ctk.CTk()
+        self.root.title(title)
+        self.root.geometry(f"{width}x{height}")
+        self.root.iconbitmap("resources/icon.ico")
+        self.root.resizable(True, True)
+        # Configure the grid to expand
+        self.root.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        # Scrollbar main frame
+        self.main = ctk.CTkScrollableFrame(self.root, fg_color="#1a1a1a")
+        self.main.grid(row=0, column=0, sticky="nsew")
+        self.main.pack_propagate(False)  # Prevent content from shrinking the frame
+        f.dbg(f"Initialized new main app with title: '{title}'")
 
 def error(msg: str) -> None:
     """
@@ -44,6 +45,14 @@ def clear_window(win: "ctk.CTk") -> None:
     for widget in win.winfo_children():
         widget.destroy()
     f.dbg("Cleared window")
+    
+def clear_frame(frame: ctk.CTkFrame) -> None:
+    """
+    Clears all widgets inside the given frame.
+    """
+    for widget in frame.winfo_children():
+        widget.destroy()
+    f.dbg("Cleared frame")
     
 def banner(win: "ctk.CTk", heading: str, text: str, height: int = 65) -> None:
     """

@@ -40,7 +40,7 @@ from ai_teacher import speech
 from ai_teacher import function as f
 from ai_teacher.global_variables import *
 # For GUI application
-import tkinter as tk
+import customtkinter as ctk
 from ai_teacher import gui
 # For Camera
 from win_resources.camera import cam_init
@@ -49,9 +49,9 @@ from win_resources.camera import cam_init
 def main():
     f.init()
     # Window initialization
-    win = gui.init() # Our main application window
+    win = gui.mainapp() # Our main application window
     cam_init(win)  # Initialize the camera
-    win.mainloop()
+    win.main.mainloop()
     f.dbg("Window is closed.")
     f.quit(0)
 
