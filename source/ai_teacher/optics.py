@@ -6,7 +6,6 @@
 # ---[ Libraries ]--- #
 from ai_teacher import function as f
 from ai_teacher.global_variables import *
-from PIL import Image, ImageTk
 from typing import Union
 import cv2
 
@@ -14,7 +13,7 @@ def init(camera_index: int, width: int = 640, height: int = 480) -> Union[bool, 
     """
     Initialize the video capturer.
     """
-    camera = cv2.VideoCapture(camera_index)
+    camera = cv2.VideoCapture(camera_index, get_camera_backend())
     
     if check_camera(camera) is False:
         f.dbg(f"Error: Could not open camera: {camera}")
@@ -25,6 +24,20 @@ def init(camera_index: int, width: int = 640, height: int = 480) -> Union[bool, 
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     f.dbg(f"Camera initialized with resolution: {width}x{height}")
     return camera
+
+def get_camera_backend():
+    """
+    Get the appropriate camera backend based on the operating system.
+    """
+    system = platform.system()
+    if system == "Windows":
+        return cv2.CAP_DSHOW
+    elif system == "Linux":
+        return cv2.CAP_V4L2  # default and best choice for Linux
+    elif system == "Darwin":  # macOS
+        return cv2.CAP_AVFOUNDATION
+    else:
+        return 0  # fallback to default
 
 def list_cameras() -> list:
     """
