@@ -12,13 +12,22 @@ from PIL import Image, ImageTk
 
 cam: "cv2.VideoCapture" = None  # Global variable to store the camera instance
 cameras: list = []  # List to store available cameras
+camera_names: list = []  # List to store camera names
+previous_camera_index: int = None # To track the previously selected camera index in change_selected_camera
 frame_update_id: int = None
+user_instruction_index: int = 0
+user_instruction_file: str = "resources/camera/camera_user_instructions.txt"
+user_image_filename_stored_file: str = "resources/camera/head_position_filenames.txt"
+user_image_folder: str = "data/trained_head_positions"
+user_image_names: list = []
+user_instructions: list = []
+init_shown: bool = False  # Flag to check if instructions have been shown
 
 def cam_init(win: "gui.mainapp") -> None:
     """
     Creates a window for selecting a camera to learn head positions.
     """
-    global cameras
+    global cameras, text_1
     win.root.title("Remeny AI Teacher - Camera Trainer")
     gui.banner(win.main, "Camera Trainer", "Select a camera to train the AI teacher.")
     
@@ -30,16 +39,16 @@ def cam_init(win: "gui.mainapp") -> None:
     add_camera_selector(win.main)
     
     # Instruction text
-    text1 = ctk.CTkLabel(
+    text_1 = ctk.CTkLabel(
         master=win.main,
         text="Loading...",
         font=ctk.CTkFont(size=14),
         justify="center"
     )
-    text1.grid(pady=(0, 5))  # Add some space below the text
+    text_1.grid(pady=(0, 5))  # Add some space below the text
     
     add_camera_preview(win.main)
-    text1.configure(text="Select a camera from the dropdown above to start.")
+    text_1.configure(text="Select a camera from the dropdown above to start.")
     add_capture_info(win.main)
     
     f.dbg("Waiting for camera selection...")
@@ -51,7 +60,7 @@ def add_camera_selector(main: "ctk.CTkFrame") -> None:
     Adds the first frame with camera selection options.
     Meant only to be executed once.
     """
-    global frame1, frame2, combobox_1, cameras
+    global frame1, frame2, combobox_1, cameras, camera_names
     # Container frame to hold label and combobox
     frame1 = ctk.CTkFrame(master=main, height=40, width=320)
     frame1.grid(padx=50, pady=20, sticky="w")  # Margin for the whole row
@@ -77,11 +86,19 @@ def add_camera_selector(main: "ctk.CTkFrame") -> None:
     combobox_1.set("")  # Set to empty string initially
     combobox_1.grid(row=0, column=1, sticky="w", padx=(0, 10), pady=6)
 
-def change_selected_camera(frame: "ctk.CTkFrame", camera_index: int, selected_camera: str) -> None:
-    global cam, frame_update_id, button1 # Use a global variable to store the camera instance
-    button1.configure(state="normal")  # Enable the capture button
+def change_selected_camera(frame: "ctk.CTkFrame", camera_index: int, selected_camera: str, reload: bool = False) -> None:
+    global cam, frame_update_id, button_1, button_2, previous_camera_index
+    capture_image(init_text = True) # Update instruction text
+    button_1.configure(state="normal")  # Enable the capture button
+    button_2.configure(state="normal")  # Enable the reload button
     
     f.dbg(f"Selecting camera: {selected_camera} at index {camera_index}")
+    
+    if previous_camera_index == camera_index and not reload:
+        f.dbg(f"Selected camera is same as previous one at index {camera_index}")
+        return
+    else:
+        f.dbg("This select is a reload.")
     
     # Cancel previous frame update loop if it exists
     if frame_update_id is not None:
@@ -139,6 +156,7 @@ def change_selected_camera(frame: "ctk.CTkFrame", camera_index: int, selected_ca
         frame_update_id = frame.after(60, update_frame)
 
     update_frame()
+    previous_camera_index = camera_index
     
 def add_camera_preview(frame: "ctk.CTkFrame") -> None:
     """
@@ -155,21 +173,97 @@ def add_capture_info(frame: "ctk.CTkFrame") -> None:
     Adds a button to capture the current frame and some text to tell the user what to do.
     Meant only to be executed once.
     """
-    global button1, text1
-    button1 = ctk.CTkButton(
-        master=frame,
+    global button_1, button_2
+    # Container to hold the two buttons side by side
+    button_row = ctk.CTkFrame(master=frame, fg_color="transparent")
+    button_row.grid(pady=(0, 20))  # Center this row in the main frame
+
+    # Button 1 - Capture
+    button_1 = ctk.CTkButton(
+        master=button_row,
         text="Capture",
         state="disabled",
-        command=lambda: f.dbg("Capture button pressed - implement capture logic here")
+        command=lambda: capture_image()
     )
-    button1.grid(pady=(0, 20))  # Add some space below the button
-    f.dbg(f"Capture button added to the frame: {frame}")
+    button_1.grid(row=0, column=0, padx=10)  # Space between buttons
+
+    # Button 2 - Reload
+    button_2 = ctk.CTkButton(
+        master=button_row,
+        text="Reload camera",
+        state="disabled",
+        command=lambda: change_selected_camera(
+            frame2,
+            camera_names.index(combobox_1.get()),
+            combobox_1.get(),
+            reload=True
+        )
+    )
+    button_2.grid(row=0, column=1, padx=10)
+
+    f.dbg(f"Capture and Reload buttons added to frame: {frame}")
     
-    text2 = ctk.CTkLabel(
+    text_2 = ctk.CTkLabel(
         master=frame,
         text="Press the 'Capture' button to capture the current frame.\n"
              "You can use this to train the AI teacher on your head positions.",
         font=ctk.CTkFont(size=14),
         justify="center"
     )
-    text2.grid(pady=(0, 20))  # Add some space below the text
+    text_2.grid(pady=(0, 20))  # Add some space below the text
+    
+def capture_image(init_text: bool = False) -> None:
+    """
+    Capture the current frame from the camera and save it.
+    """
+    global cam, init_shown, user_instruction_index, user_instructions, user_instructions_files, text_1, combobox_1, button_1
+    
+    if init_text:
+        if not init_shown:
+            get_instructions()
+            f.dbg("Instruction messages:", user_instructions)
+            f.dbg("Head_position filenames:", user_image_names)
+            init_shown = True
+        return
+    
+    if not optics.write_image(cam, f"data/trained_head_positions/{user_image_names[user_instruction_index]}"):
+        gui.error("Failed to capture image from camera.")
+        return
+    
+    # Check so that it doesn't throw index out of range error next time
+    if user_instruction_index + 1 < len(user_instructions):
+        user_instruction_index += 1
+        text_1.configure(text=user_instructions[user_instruction_index])
+    else:
+        f.dbg("No more instructions or next instruction is empty/null.")
+        text_1.configure(text="Awesome. Click 'next' to continue.")
+        button_1.configure(state="disabled")  # Disable the button after capturing is finished
+        button_2.configure(state="disabled") # Disable the reload button
+        combobox_1.configure(state="disabled") # Disable the combobox after capturing is finished
+    
+def get_instructions() -> None:
+    global user_instruction_index, user_instructions, user_instruction_file
+    global user_image_folder, user_image_filename_stored_file
+    global user_image_names, text_1
+
+    try:
+        # Read user instructions
+        with open(user_instruction_file, 'r') as f1:
+            user_instructions = [line.strip() for line in f1]
+        f.dbg(f"Finished reading user instructions from file: {user_instruction_file}")
+        text_1.configure(text=user_instructions[user_instruction_index])
+        user_instruction_index = 0
+
+        # Read image filenames
+        with open(user_image_filename_stored_file, 'r') as f2:
+            user_image_names = [line.strip() for line in f2]
+        f.dbg(f"Finished reading filenames from file '{user_image_filename_stored_file}'.")
+
+    except FileNotFoundError as e:
+        f.quit(1, f"Error: File not found - {e.filename}")
+    except PermissionError as e:
+        f.quit(1, f"Error: No permission to read - {e.filename}")
+    except IndexError:
+        f.quit(1, f"Error: user_instruction_index is out of range: {user_instruction_index}")
+    except Exception as e:
+        f.quit(1, f"Unexpected error: {e}")

@@ -69,3 +69,16 @@ def check_camera(camera: "cv2.VideoCapture") -> bool:
     
     f.dbg("Camera check successful.")
     return True
+
+def write_image(camera: "cv2.VideoCapture", save_path: str) -> bool:
+    """
+    Capture an image from the camera and save it to the specified path.
+    """
+    ret, frame = camera.read()
+    if ret:
+        cv2.imwrite(save_path, frame)
+        f.dbg(f"Image captured and saved to {save_path}")
+        return True
+    else:
+        f.dbg(f"Failed to capture image: ret value = {ret}")
+        return False
