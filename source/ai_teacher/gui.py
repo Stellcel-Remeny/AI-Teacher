@@ -54,7 +54,7 @@ def clear_frame(frame: ctk.CTkFrame) -> None:
         widget.destroy()
     f.dbg("Cleared frame")
     
-def banner(win: "ctk.CTk", heading: str, text: str, height: int = 65) -> None:
+def banner(win: "ctk.CTkFrame", heading: str, text: str, height: int = 65) -> None:
     """
     Adds some user-friendly text at the top, expanding horizontally with window resize.
     """
@@ -81,3 +81,41 @@ def banner(win: "ctk.CTk", heading: str, text: str, height: int = 65) -> None:
     label_text.pack(anchor="w", padx=16, pady=(0, 5))  # Bottom padding only
 
     f.dbg(f"Added banner with heading: '{heading}' and text: '{text}'")
+    
+def action_bar(win: "ctk.CTk", buttons: "tuple[tuple[str, callable], ...]") -> "tuple[ctk.CTkFrame, dict[str, ctk.CTkButton]]":
+    """
+    Adds a horizontal action bar with buttons at the bottom of the window.
+
+    Returns:
+        A tuple of (action_frame, button_dict)
+    """
+    win.rowconfigure(0, weight=1)
+    win.rowconfigure(1, weight=0)
+    win.columnconfigure(0, weight=1)
+
+    action_frame = ctk.CTkFrame(master=win, height=40, corner_radius=10)
+    action_frame.grid(row=1, column=0, sticky="ew")
+    action_frame.grid_propagate(False)
+
+    button_refs = {}
+
+    for text, command in buttons:
+        button = ctk.CTkButton(master=action_frame, text=text, command=command)
+        button.pack(side="right", padx=(5, 5), pady=5)
+        button_refs[text] = button  # Save reference
+
+    f.dbg(f"Added action bar with buttons: {buttons}")
+    return action_frame, button_refs
+
+def quit() -> None:
+    """
+    Asks if the user wants to quit the application.
+    """
+    result = messagebox.askquestion("Confirm Action", "Are you sure you want to quit?")
+    if result == "yes":
+        f.dbg("GUI: Quitting application...")
+        ctk.CTk().destroy()  # Close the main window
+        f.quit(0)  # Call the quit function from function module
+        
+def not_implemented_yet() -> None:
+    messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.")
