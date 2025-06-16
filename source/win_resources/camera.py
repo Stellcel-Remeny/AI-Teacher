@@ -27,9 +27,15 @@ def cam_init(win: "gui.mainapp") -> None:
     """
     Creates a window for selecting a camera to learn head positions.
     """
-    global cameras, text_1
+    global cameras, text_1, action_buttons
     win.root.title("Remeny AI Teacher - Camera Trainer")
     gui.banner(win.main, "Camera Trainer", "Select a camera to train the AI teacher.")
+    action_bar, action_buttons = gui.action_bar(
+        win.root,
+        buttons=(("Next", gui.not_implemented_yet), ("Cancel", gui.quit))
+    )
+    
+    action_buttons["Next"].configure(state="disabled")
     
     cameras = optics.list_cameras()
     if not cameras:
@@ -216,7 +222,7 @@ def capture_image(init_text: bool = False) -> None:
     """
     Capture the current frame from the camera and save it.
     """
-    global cam, init_shown, user_instruction_index, user_instructions, user_instructions_files, text_1, combobox_1, button_1
+    global cam, init_shown, user_instruction_index, user_instructions, user_instructions_files, text_1, combobox_1, button_1, action_buttons
     
     if init_text:
         if not init_shown:
@@ -240,6 +246,7 @@ def capture_image(init_text: bool = False) -> None:
         button_1.configure(state="disabled")  # Disable the button after capturing is finished
         button_2.configure(state="disabled") # Disable the reload button
         combobox_1.configure(state="disabled") # Disable the combobox after capturing is finished
+        action_buttons["Next"].configure(state="normal") # Enable the next button to continue
     
 def get_instructions() -> None:
     global user_instruction_index, user_instructions, user_instruction_file
@@ -258,6 +265,12 @@ def get_instructions() -> None:
         with open(user_image_filename_stored_file, 'r') as f2:
             user_image_names = [line.strip() for line in f2]
         f.dbg(f"Finished reading filenames from file '{user_image_filename_stored_file}'.")
+        
+            # Check if lengths match
+        if len(user_instructions) != len(user_image_names):
+            raise ValueError(
+                f"Instruction count ({len(user_instructions)}) does not match filename count ({len(user_image_names)})."
+            )
 
     except FileNotFoundError as e:
         f.quit(1, f"Error: File not found - {e.filename}")
@@ -265,5 +278,7 @@ def get_instructions() -> None:
         f.quit(1, f"Error: No permission to read - {e.filename}")
     except IndexError:
         f.quit(1, f"Error: user_instruction_index is out of range: {user_instruction_index}")
+    except ValueError as e:
+        f.quit(1, f"Mismatch error: {e}")
     except Exception as e:
         f.quit(1, f"Unexpected error: {e}")
