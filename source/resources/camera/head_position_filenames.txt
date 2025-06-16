@@ -1,0 +1,5 @@
+HEAD_STRAIGHT.jpg
+HEAD_LEFT.jpg
+HEAD_RIGHT.jpg
+HEAD_DOWN.jpg
+HEAD_UP.jpg

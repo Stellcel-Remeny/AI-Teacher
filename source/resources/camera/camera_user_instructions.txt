@@ -1,0 +1,5 @@
+Look straight into the camera
+Turn your head left
+Turn your head right
+Look down
+Look up
