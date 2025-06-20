@@ -38,7 +38,7 @@
 # ---[ Libraries ]--- #
 from ai_teacher import speech
 from ai_teacher import function as f
-from ai_teacher.global_variables import *
+from source.ai_teacher.shared_variables import *
 # For GUI application
 import customtkinter as ctk
 from ai_teacher import gui
