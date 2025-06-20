@@ -5,7 +5,7 @@
 
 # ---[ Libraries ]--- #
 from ai_teacher import function as f
-from ai_teacher.global_variables import *
+from source.ai_teacher.shared_variables import *
 from typing import Union
 import cv2
 
