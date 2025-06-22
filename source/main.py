@@ -20,4 +20,9 @@ def main():
     f.quit(0)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        f.quit(130, "Quitting on keyboard interruption")
+    except Exception as e:
+        print("Exception:", e)
