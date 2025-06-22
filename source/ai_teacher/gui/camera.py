@@ -3,10 +3,13 @@
 # Copyright (C) 2025 Remeny
 #
 
+# ---[ Libraries ]--- #
+from ai_teacher.resources import functions as f
+from ai_teacher.resources import shared
+from ai_teacher.backend import camera_backend
+from ai_teacher.gui import gui
+
 import customtkinter as ctk
-from ai_teacher import optics
-from ai_teacher import gui
-from ai_teacher import function as f
 import cv2
 from PIL import Image, ImageTk
 
@@ -16,14 +19,14 @@ camera_names: list = []  # List to store camera names
 previous_camera_index: int = None # To track the previously selected camera index in change_selected_camera
 frame_update_id: int = None
 user_instruction_index: int = 0
-user_instruction_file: str = "resources/camera/camera_user_instructions.txt"
-user_image_filename_stored_file: str = "resources/camera/head_position_filenames.txt"
-user_image_folder: str = "data/trained_head_positions"
+user_instruction_file: str = f"{shared.app_dir}/text/camera/camera_user_instructions.txt"
+user_image_filename_stored_file: str = f"{shared.app_dir}/text/camera/head_position_filenames.txt"
+user_image_folder: str = f"{shared.user_dir}/trained_head_positions"
 user_image_names: list = []
 user_instructions: list = []
 init_shown: bool = False  # Flag to check if instructions have been shown
 
-def cam_init(win: "gui.mainapp") -> None:
+def init(win: "gui.mainapp") -> None:
     """
     Creates a window for selecting a camera to learn head positions.
     """
@@ -32,12 +35,12 @@ def cam_init(win: "gui.mainapp") -> None:
     gui.banner(win.main, "Camera Trainer", "Select a camera to train the AI teacher.")
     action_bar, action_buttons = gui.action_bar(
         win.root,
-        buttons=(("Next", gui.not_implemented_yet), ("Cancel", gui.quit))
+        buttons=(("Next", gui.not_implemented), ("Cancel", gui.quit))
     )
     
     action_buttons["Next"].configure(state="disabled")
     
-    cameras = optics.list_cameras()
+    cameras = camera_backend.list_cameras()
     if not cameras:
         # No cameras are available
         f.quit(1, "No cameras are available. Check if you have permissions, or connect a camera if you don't have one.")
@@ -121,7 +124,7 @@ def change_selected_camera(frame: "ctk.CTkFrame", camera_index: int, selected_ca
     for widget in frame.winfo_children():
         widget.destroy()
     
-    cam = optics.init(camera_index)
+    cam = camera_backend.init(camera_index)
     if cam is False:
         gui.error("Camera initialization failed. Please make sure you have access and that the camera is working.")
         return
@@ -232,7 +235,7 @@ def capture_image(init_text: bool = False) -> None:
             init_shown = True
         return
     
-    if not optics.write_image(cam, f"data/trained_head_positions/{user_image_names[user_instruction_index]}"):
+    if not camera_backend.write_image(cam, f"data/trained_head_positions/{user_image_names[user_instruction_index]}"):
         gui.error("Failed to capture image from camera.")
         return
     

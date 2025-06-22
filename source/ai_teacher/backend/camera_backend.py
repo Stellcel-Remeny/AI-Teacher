@@ -4,10 +4,11 @@
 #
 
 # ---[ Libraries ]--- #
-from ai_teacher import function as f
-from source.ai_teacher.shared_variables import *
+from ai_teacher.resources import functions as f
+from ai_teacher.resources import shared
 from typing import Union
 import cv2
+import platform
 
 def init(camera_index: int, width: int = 640, height: int = 480) -> Union[bool, cv2.VideoCapture]:
     """
@@ -43,13 +44,22 @@ def list_cameras() -> list:
     """
     List available cameras.
     """
-    from pygrabber.dshow_graph import FilterGraph
-    graph = FilterGraph()
-    devices = graph.get_input_devices()
     cameras = []
-    for i, name in enumerate(devices):
-        cameras.append((i, name))
-    
+
+    if platform.system() == "Windows":
+        from pygrabber.dshow_graph import FilterGraph
+        graph = FilterGraph()
+        devices = graph.get_input_devices()
+        for i, name in enumerate(devices):
+            cameras.append((i, name))
+    else:
+        max_test = 5  # Try 0 to 4
+        for i in range(max_test):
+            cap = cv2.VideoCapture(i)
+            if cap.read()[0]:
+                cameras.append((i, f"Camera {i}"))
+            cap.release()
+
     f.dbg(f"Available cameras: {cameras}")
     return cameras
 

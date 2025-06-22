@@ -4,9 +4,13 @@
 #
 
 # ---[ Libraries ]--- #
-from ai_teacher import function as f
-import customtkinter as ctk
+from ai_teacher.resources import functions as f
+from ai_teacher.resources import shared
+
 from tkinter import messagebox
+import customtkinter as ctk
+import os
+import platform
 
 class mainapp:
     """
@@ -18,7 +22,15 @@ class mainapp:
         self.root = ctk.CTk()
         self.root.title(title)
         self.root.geometry(f"{width}x{height}")
-        self.root.iconbitmap("resources/icon.ico")
+        if platform.system() == "Windows":
+            self.root.iconbitmap(f"{shared.app_dir}/media/icons/icon.ico")
+        else:
+            xbm_path = f"{shared.app_dir}/media/icons/icon-0.xbm"
+            if os.path.exists(xbm_path):
+                self.root.iconbitmap(f"@{xbm_path}")
+            else:
+                print("[Info] XBM icon not found, skipping window icon.")
+        
         self.root.resizable(True, True)
         # Configure the grid to expand
         self.root.rowconfigure(0, weight=1)
@@ -117,5 +129,5 @@ def quit() -> None:
         ctk.CTk().destroy()  # Close the main window
         f.quit(0)  # Call the quit function from function module
         
-def not_implemented_yet() -> None:
+def not_implemented() -> None:
     messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.")
