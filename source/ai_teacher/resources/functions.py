@@ -12,6 +12,7 @@ import sys
 import configparser
 import time
 from datetime import datetime
+from configupdater import ConfigUpdater
 
 # ---[ Variables ]--- #
 logfile_name: str
@@ -78,20 +79,22 @@ def load_config(ini_file: str) -> configparser.ConfigParser:
     config.read(ini_file)
     return config
 
-def update_ini(ini_file: str, section: str, key: str, value: str, quotes: bool = False) -> None:
-    """
-    Adds or updates a value of a key in a .ini file
-    """
-    config = configparser.ConfigParser()
-    config.read(ini_file)
+from configupdater import ConfigUpdater
 
-    if not config.has_section(section):
-        config.add_section(section)
+def update_ini(ini_file: str, section: str, key: str, value: str) -> None:
+    updater = ConfigUpdater()
+    updater.read(ini_file)
 
-    config.set(section, key, value)
+    if not updater.has_section(section):
+        updater.add_section(section)
 
-    with open(ini_file, 'w') as configfile:
-        config.write(configfile)
+    if updater.has_option(section, key):
+        updater[section][key].value = value
+    else:
+        updater[section].add_option(key, value)
+
+    with open(ini_file, 'w', encoding='utf-8') as f:
+        updater.write(f)
 
 def display_version() -> None:
     shared.build_number = str(int(shared.config.get('Version', 'build', fallback='0')) + 1)
