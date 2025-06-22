@@ -18,6 +18,15 @@ class mainapp:
     This class is responsible for initializing the main window.
     """
     def __init__(self, title: str = "Remeny AI Teacher", width: int = 800, height: int = 600):
+        # Theme settings
+        theme = shared.config.get('Main', 'theme')
+        if theme in ("auto", "system"):
+            ctk.set_appearance_mode("system")
+        elif theme in ("light", "dark"):
+            ctk.set_appearance_mode(theme)
+        else:
+            quit(1, "Invalid theme= setting in configuration.ini")
+        
         # basic stuff
         self.root = ctk.CTk()
         self.root.title(title)
