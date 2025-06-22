@@ -8,6 +8,9 @@ This program is being developed as an easy way that people can use AI for gettin
 
 Just trying & learing along the way
 
+## Mockup
+![Mockup](media/mockup.png)
+
 ## Currently available features
 
  - Captures images with some cool UI
