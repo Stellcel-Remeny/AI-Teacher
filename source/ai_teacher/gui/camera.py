@@ -19,9 +19,9 @@ camera_names: list = []  # List to store camera names
 previous_camera_index: int = None # To track the previously selected camera index in change_selected_camera
 frame_update_id: int = None
 user_instruction_index: int = 0
-user_instruction_file: str = f"{shared.app_dir}/text/camera/camera_user_instructions.txt"
-user_image_filename_stored_file: str = f"{shared.app_dir}/text/camera/head_position_filenames.txt"
-user_image_folder: str = f"{shared.user_dir}/trained_head_positions"
+user_instruction_file: str
+user_image_filename_stored_file: str
+user_image_folder: str
 user_image_names: list = []
 user_instructions: list = []
 init_shown: bool = False  # Flag to check if instructions have been shown
@@ -30,6 +30,12 @@ def init(win: "gui.mainapp") -> None:
     """
     Creates a window for selecting a camera to learn head positions.
     """
+    # Variable initialization
+    global user_instruction_file, user_image_filename_stored_file, user_image_folder
+    user_instruction_file = f"{shared.app_dir}/text/camera/camera_user_instructions.txt"
+    user_image_filename_stored_file = f"{shared.app_dir}/text/camera/head_position_filenames.txt"
+    user_image_folder = f"{shared.user_dir}/trained_head_positions"
+    
     global cameras, text_1, action_buttons
     win.root.title("Remeny AI Teacher - Camera Trainer")
     gui.banner(win.main, "Camera Trainer", "Select a camera to train the AI teacher.")
@@ -225,13 +231,13 @@ def capture_image(init_text: bool = False) -> None:
     """
     Capture the current frame from the camera and save it.
     """
-    global cam, init_shown, user_instruction_index, user_instructions, user_instructions_files, text_1, combobox_1, button_1, action_buttons
+    global cam, init_shown, user_instruction_index, user_instructions, user_instruction_file, text_1, combobox_1, button_1, action_buttons
     
     if init_text:
         if not init_shown:
             get_instructions()
-            f.dbg("Instruction messages:", user_instructions)
-            f.dbg("Head_position filenames:", user_image_names)
+            f.dbg(f"Instruction messages: {user_instructions}")
+            f.dbg(f"Head_position filenames: {user_image_names}")
             init_shown = True
         return
     
