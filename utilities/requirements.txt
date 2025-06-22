@@ -7,3 +7,5 @@ pillow
 customtkinter
 pygrabber
 scikit-learn
+configupdater
+mediapipe
