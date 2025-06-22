@@ -241,7 +241,7 @@ def capture_image(init_text: bool = False) -> None:
             init_shown = True
         return
     
-    if not camera_backend.write_image(cam, f"data/trained_head_positions/{user_image_names[user_instruction_index]}"):
+    if not camera_backend.write_image(cam, f"{shared.user_dir}/trained_head_positions/{user_image_names[user_instruction_index]}"):
         gui.error("Failed to capture image from camera.")
         return
     
