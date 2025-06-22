@@ -36,7 +36,10 @@ class mainapp:
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
         # Scrollbar main frame
-        self.main = ctk.CTkScrollableFrame(self.root, fg_color="#1a1a1a")
+        self.main = ctk.CTkScrollableFrame(
+            self.root,
+            fg_color=("#e5e5e5", "#1a1a1a")  # Light theme, Dark theme
+        )
         self.main.grid(row=0, column=0, sticky="nsew")
         self.main.pack_propagate(False)  # Prevent content from shrinking the frame
         f.dbg(f"Initialized new main app with title: '{title}'")
