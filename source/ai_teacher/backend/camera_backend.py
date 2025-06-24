@@ -53,12 +53,17 @@ def list_cameras() -> list:
         for i, name in enumerate(devices):
             cameras.append((i, name))
     else:
-        max_test = 5  # Try 0 to 4
-        for i in range(max_test):
+        i = 0
+        fails = 0
+        while fails < 3:  # stop after 3 failed indices in a row
             cap = cv2.VideoCapture(i)
             if cap.read()[0]:
                 cameras.append((i, f"Camera {i}"))
+                fails = 0
+            else:
+                fails += 1
             cap.release()
+            i += 1
 
     f.dbg(f"Available cameras: {cameras}")
     return cameras
