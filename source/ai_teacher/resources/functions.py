@@ -172,7 +172,7 @@ def show_notices(disclaimer_file: str, license_name: str) -> None:
 # ---[ User login ]--- #
 def login() -> bool:
     shared.user_name = input("Enter username (will create if not exist):")
-    shared.user_dir = f"{shared.app_dir}/data/{shared.user_name}"
+    shared.user_dir = f"{shared.app_dir}/data/{shared.user_name}".lower()
     os.makedirs(shared.user_dir, exist_ok=True)
     dbg(f"Logging in as {shared.user_name}")
     return True
