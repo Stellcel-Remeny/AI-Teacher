@@ -11,6 +11,7 @@ import os
 import sys
 import configparser
 import time
+import platform
 from datetime import datetime
 from configupdater import ConfigUpdater
 
@@ -52,6 +53,7 @@ def quit(return_code: int, text: str = "") -> None:
     # Display error dialog if return_code != 0:
     if return_code != 0:
         dbg(f"ERROR! RETURN CODE: {return_code}")
+        dbg(f"Error message: {text}")
         print(f"An error occurred: {text}")
         gui.error(text)
 
@@ -65,6 +67,20 @@ def quit(return_code: int, text: str = "") -> None:
     exit(return_code)
 
 # ---[ Secondary Functions ]--- #
+def clear_screen():
+    """
+    This function clears the terminal
+    """
+    if not shared.config.getboolean('Debug', 'clear_terminal_on_startup', fallback=False):
+        return
+    
+    dbg("Clearing screen...")
+    
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        os.system("clear")
+    
 def load_config(ini_file: str) -> configparser.ConfigParser:
     """
     This function loads given .ini file
@@ -193,6 +209,7 @@ def init() -> None:
     logfile_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
     logfile_name = f"{logfile_directory}/{logfile_name}"
     
+    clear_screen()
     display_version()
     create_folders()
     show_notices(f"{shared.app_dir}/text/DISCLAIMER.txt", "GPLv3")
