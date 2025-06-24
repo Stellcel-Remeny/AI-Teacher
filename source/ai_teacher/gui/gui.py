@@ -131,6 +131,31 @@ def action_bar(win: "ctk.CTk", buttons: "tuple[tuple[str, callable], ...]") -> "
     f.dbg(f"Added action bar with buttons: {buttons}")
     return action_frame, button_refs
 
+class CTkLabeledComboBox(ctk.CTkFrame):
+    def __init__(
+        self,
+        master: ctk.CTkFrame,
+        text: str,
+        values: list[str],
+        default_value: str = "",
+        width: int = 200,
+        height: int = 30,   
+        *args, **kwargs
+    ):
+        super().__init__(master=master, width=width, height=height, *args, **kwargs)
+        self.label = ctk.CTkLabel(self, text=text)
+        self.label.pack(side="left", padx=5, pady=5)
+
+        self.combobox = ctk.CTkComboBox(self, values=values, width=width - 50)
+        self.combobox.pack(side="left", padx=5, pady=5)
+        self.combobox.set(default_value)
+
+    def get(self) -> str:
+        return self.combobox.get()
+
+    def set(self, value: str):
+        self.combobox.set(value)
+
 def quit() -> None:
     """
     Asks if the user wants to quit the application.
