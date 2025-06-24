@@ -15,7 +15,7 @@ def main():
     f.init()
     # Window initialization
     win = gui.gui.mainapp() # Our main application window
-    gui.camera.init(win)  # Initialize the camera
+    gui.camera.init(win)  # Start mediapipe and the user webcam
     f.dbg("Window is closed.")
     f.quit(0)
 
