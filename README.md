@@ -11,6 +11,9 @@ Just trying & learing along the way
 ## Mockup
 ![Mockup](media/mockup.png)
 
+## Flowchart
+![Flowchart](media/flowchart.png)
+
 ## Currently available features
 
  - Captures images with some cool UI
