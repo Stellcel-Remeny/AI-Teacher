@@ -188,9 +188,15 @@ def show_notices(disclaimer_file: str, license_name: str) -> None:
 # ---[ User login ]--- #
 def login() -> bool:
     shared.user_name = input("Enter username (will create if not exist):")
-    shared.user_dir = f"{shared.app_dir}/data/{shared.user_name}".lower()
-    os.makedirs(shared.user_dir, exist_ok=True)
+    shared.user_dir = f"{shared.app_dir}/data/{shared.user_name.lower()}"
+    os.makedirs(shared.user_dir)
+    
+    if not os.path.isdir(shared.user_dir):
+        dbg(f"ERROR: Failed to create user directory at {shared.user_dir}")
+        quit(1, "Could not create user directory.")
+    
     dbg(f"Logging in as {shared.user_name}")
+    dbg(f"User directory full path at: {shared.user_dir}")
     return True
 
 # ---[ Init function ]--- #
