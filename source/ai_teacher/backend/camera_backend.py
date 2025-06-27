@@ -10,36 +10,6 @@ from typing import Union
 import cv2
 import platform
 
-def init(camera_index: int, width: int = 640, height: int = 480) -> Union[bool, cv2.VideoCapture]:
-    """
-    Initialize the video capturer.
-    """
-    camera = cv2.VideoCapture(camera_index, get_camera_backend())
-    
-    if check_camera(camera) is False:
-        f.dbg(f"Error: Could not open camera: {camera}")
-        f.dbg(f"Camera index {camera_index} couldn't be opened.")
-        return False
-    
-    camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    f.dbg(f"Camera initialized with resolution: {width}x{height}")
-    return camera
-
-def get_camera_backend():
-    """
-    Get the appropriate camera backend based on the operating system.
-    """
-    system = platform.system()
-    if system == "Windows":
-        return cv2.CAP_DSHOW
-    elif system == "Linux":
-        return cv2.CAP_V4L2  # default and best choice for Linux
-    elif system == "Darwin":  # macOS
-        return cv2.CAP_AVFOUNDATION
-    else:
-        return 0  # fallback to default
-
 def list_cameras() -> list:
     """
     List available cameras.
@@ -57,7 +27,8 @@ def list_cameras() -> list:
         fails = 0
         while fails < 3:  # stop after 3 failed indices in a row
             cap = cv2.VideoCapture(i)
-            if cap.read()[0]:
+            f.dbg(f"Trying capture: {cap}")
+            if check_camera(cap):
                 cameras.append((i, f"Camera {i}"))
                 fails = 0
             else:
@@ -84,16 +55,3 @@ def check_camera(camera: "cv2.VideoCapture") -> bool:
     
     f.dbg("Camera check successful.")
     return True
-
-def write_image(camera: "cv2.VideoCapture", save_path: str) -> bool:
-    """
-    Capture an image from the camera and save it to the specified path.
-    """
-    ret, frame = camera.read()
-    if ret:
-        cv2.imwrite(save_path, frame)
-        f.dbg(f"Image captured and saved to {save_path}")
-        return True
-    else:
-        f.dbg(f"Failed to capture image: ret value = {ret}")
-        return False
