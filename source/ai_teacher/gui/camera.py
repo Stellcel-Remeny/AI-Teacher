@@ -36,6 +36,10 @@ def init(win: "gui.mainapp") -> None:
     camera_names = [name for (_, name) in cameras]
     
     # Add the camera selector
-    combobox_1 = gui.CTkLabeledComboBox(win.main, "Use camera:", camera_names)
-    combobox_1.grid(padx=50, pady=20, sticky="w")
+    combobox_cam_selector = gui.CTkLabeledComboBox(win.main, "Use camera:", camera_names)
+    combobox_cam_selector.grid(padx=50, pady=20, sticky="w")
+    
+    # Textboxes
+    help_label = ctk.CTkLabel(win.main, text="/\\\n|\nSelect a camera from the dropdown above.\nYou should see another window pop up with the camera feed.")
+    help_label.grid(padx=10, pady=0, sticky="w")
     win.root.mainloop()
