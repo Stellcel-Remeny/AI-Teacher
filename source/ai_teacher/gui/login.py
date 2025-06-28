@@ -9,7 +9,7 @@ from ai_teacher.resources import functions as f
 from ai_teacher.gui import gui
 
 import tkinter as tk
-import customtkinter as ctk
+import customtkinter as ctk # type: ignore
 import os
 
 # ---[ Global variables ]--- #
@@ -84,7 +84,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         fg_color="#F0F0F0",
         command=on_back
         )
-    Button_id7.place(x=5, y=120)
+    Button_id7.place(x=5, y=120) # type: ignore
     Button_id6 = ctk.CTkButton(
         master=window,
         text="Quit APP",
@@ -101,7 +101,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         fg_color="#F0F0F0",
         command=gui.quit
         )
-    Button_id6.place(x=230, y=120)
+    Button_id6.place(x=230, y=120) # type: ignore
     Button_id5 = ctk.CTkButton(
         master=window,
         text="Create",
@@ -118,7 +118,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         fg_color="#F0F0F0",
         command=on_create_user
         )
-    Button_id5.place(x=130, y=120)
+    Button_id5.place(x=130, y=120) # type: ignore
     Label_id2 = ctk.CTkLabel(
         master=window,
         text="Enter username for new account:",
@@ -130,7 +130,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         bg_color="#FFFFFF",
         fg_color="#FFFFFF",
         )
-    Label_id2.place(x=70, y=30)
+    Label_id2.place(x=70, y=30) # type: ignore
     Entry_id1 = ctk.CTkEntry(
         master=window,
         placeholder_text="Username",
@@ -145,7 +145,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         bg_color="#FFFFFF",
         fg_color="#F0F0F0",
         )
-    Entry_id1.place(x=60, y=60)
+    Entry_id1.place(x=60, y=60) # type: ignore
     Label_id3 = ctk.CTkLabel(
         master=window,
         text="This account won't be saved until you log in once.",
@@ -157,7 +157,7 @@ def create_user(enable_back_button: bool = False) -> bool | None:
         bg_color="#FFFFFF",
         fg_color="#FFFFFF",
         )
-    Label_id3.place(x=20, y=90)
+    Label_id3.place(x=20, y=90) # type: ignore
 
     # Check if we want to enable the back button
     if not enable_back_button:
@@ -177,8 +177,8 @@ def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar
     f.dbg(f"User directories: {user_directories}")
 
     # Clear all old radio buttons from frame
-    for widget in radio_frame.winfo_children():
-        widget.destroy()
+    for widget in radio_frame.winfo_children(): # type: ignore
+        widget.destroy() # type: ignore
 
     # Create new radio buttons
     for i, user_name in enumerate(user_names):
@@ -195,7 +195,8 @@ def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar
             radiobutton_width=20,
             border_color="#000000"
         )
-        radio.pack(anchor="w", pady=5, padx=10)
+        radio.pack(anchor="w", pady=5, padx=10) # type: ignore
+        f.dbg(f"User {i} is '{user_name}' with directory '{user_directories[i]}'")
     
 def display_login_prompt() -> str:
     """
@@ -253,7 +254,7 @@ def display_login_prompt() -> str:
         fg_color="#F0F0F0",
         command=on_new
         )
-    Button_id7.place(x=380, y=20)
+    Button_id7.place(x=380, y=20) # type: ignore
     Button_id6 = ctk.CTkButton(
         master=login_window,
         text="Cancel",
@@ -270,7 +271,7 @@ def display_login_prompt() -> str:
         fg_color="#F0F0F0",
         command=gui.quit
         )
-    Button_id6.place(x=390, y=280)
+    Button_id6.place(x=390, y=280) # type: ignore
     Button_id5 = ctk.CTkButton(
         master=login_window,
         text="Login",
@@ -287,7 +288,7 @@ def display_login_prompt() -> str:
         fg_color="#F0F0F0",
         command=on_login
         )
-    Button_id5.place(x=280, y=280)
+    Button_id5.place(x=280, y=280) # type: ignore
     Label_id2 = ctk.CTkLabel(
         master=login_window,
         text="Select your account",
@@ -299,11 +300,11 @@ def display_login_prompt() -> str:
         bg_color="#FFFFFF",
         fg_color="#FFFFFF",
         )
-    Label_id2.place(x=20, y=10)
+    Label_id2.place(x=20, y=10) # type: ignore
 
     # Frame to hold radio buttons
     radio_frame = ctk.CTkFrame(master=login_window, fg_color="#FFFFFF", width=300, height=200)
-    radio_frame.place(x=20, y=60)
+    radio_frame.place(x=20, y=60) # type: ignore
 
     # List users
     selected_user_var = tk.StringVar()

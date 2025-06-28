@@ -98,10 +98,10 @@ def load_config(ini_file: str) -> configparser.ConfigParser:
 def update_ini(ini_file: str, section: str, key: str, value: str) -> None:
     from configupdater import ConfigUpdater
     
-    updater = ConfigUpdater()
-    updater.read(ini_file)
+    updater: ConfigUpdater = ConfigUpdater()
+    updater.read(ini_file) # type: ignore
 
-    if not updater.has_section(section):
+    if not updater.has_section(section): # type: ignore
         updater.add_section(section)
 
     updater[section][key] = value
@@ -168,6 +168,7 @@ def show_notices(disclaimer_file: str, license_name: str) -> None:
     """
     Outputs disclaimer file, and also tells
     that the software is licensed under 'license'
+    TODO: Make this a GUI dialog
     """
     # Show disclaimer
     if not shared.user_config.getboolean('Main', 'disclaimer_accepted', fallback=False):
@@ -240,7 +241,7 @@ def init() -> None:
     # Variable initialization
     shared.init_time = time.time()
     shared.init_time_formatted = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    shared.app_dir = os.path.dirname(os.path.abspath(sys.modules['__main__'].__file__))
+    shared.app_dir = os.path.dirname(os.path.abspath(str(getattr(sys.modules['__main__'], '__file__', ''))))
     shared.config_file = os.path.join(shared.app_dir, "settings", "configuration.ini")
     shared.config = load_config(shared.config_file)
     logfile_directory = os.path.join(shared.app_dir, shared.config.get('Debug', 'log_directory', fallback='logfiles'))
