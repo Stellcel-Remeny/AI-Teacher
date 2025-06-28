@@ -177,8 +177,7 @@ def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar
     f.dbg(f"User directories: {user_directories}")
 
     # Clear all old radio buttons from frame
-    for widget in radio_frame.winfo_children(): # type: ignore
-        widget.destroy() # type: ignore
+    gui.clear_frame(radio_frame)
 
     # Create new radio buttons
     for i, user_name in enumerate(user_names):

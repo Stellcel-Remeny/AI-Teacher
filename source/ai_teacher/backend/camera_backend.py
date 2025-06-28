@@ -10,11 +10,11 @@ from typing import Union
 import cv2
 import platform
 
-def list_cameras() -> list:
+def list_cameras() -> list[tuple[int, str]]:
     """
     List available cameras.
     """
-    cameras = []
+    cameras: list[tuple[int, str]] = []
 
     if platform.system() == "Windows":
         from pygrabber.dshow_graph import FilterGraph
@@ -49,7 +49,7 @@ def check_camera(camera: "cv2.VideoCapture") -> bool:
         return False
     
     ret, frame = camera.read()
-    if not ret or frame is None:
+    if not ret or frame is None: # type: ignore
         f.dbg("Error: Could not read from camera.")
         return False
     

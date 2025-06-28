@@ -8,8 +8,6 @@ from ai_teacher.resources import shared
 from ai_teacher.resources import functions as f
 from ai_teacher import gui
 
-import customtkinter as ctk
-
 # ---[ Main Initialization ]--- #
 def main():
     f.init()
