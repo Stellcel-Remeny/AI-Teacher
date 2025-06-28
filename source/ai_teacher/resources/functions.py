@@ -220,7 +220,9 @@ def login() -> bool:
         
         with open (shared.user_config_file, 'w', encoding='utf-8') as f:
             shared.user_config.write(f)
-        
+            
+        dbg(f"Adding pretty name {shared.user_name}")
+        update_ini(shared.user_config_file, 'Account', 'pretty_name', shared.user_name)
         dbg(f"Reloading to make sure changes are made")
         shared.user_config.clear()
         shared.user_config = load_config(shared.user_config_file)
