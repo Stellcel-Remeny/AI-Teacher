@@ -8,27 +8,36 @@ from ai_teacher.resources import functions as f
 from ai_teacher.resources import shared
 
 from tkinter import messagebox
+from typing import Callable
+from typing import Union
+
+import tkinter as tk
 import customtkinter as ctk
 import os
 import platform
 
-class mainapp:
+class app:
     """
-    Main application class for Remeny AI Teacher GUI.
-    This class is responsible for initializing the main window.
+    Application class for Remeny AI Teacher GUI.
     """
     def __init__(self, title: str = "Remeny AI Teacher", width: int = 800, height: int = 600):
         # Theme settings
-        theme = shared.config.get('Main', 'theme')
+        theme: str = (
+            shared.user_config.get('Main', 'theme', fallback="system").lower()
+            if shared.user_config is not None else
+            "system"
+        )
         if theme in ("auto", "system"):
             ctk.set_appearance_mode("system")
         elif theme in ("light", "dark"):
             ctk.set_appearance_mode(theme)
         else:
-            quit(1, "Invalid theme= setting in configuration.ini")
+            f.dbg("Invalid theme= setting in configuration.ini, defaulting to system theme")
+            warn("Invalid theme= setting in configuration.ini")
+            ctk.set_appearance_mode("system")
         
         # basic stuff
-        self.root = ctk.CTk()
+        self.root = ctk.CTkToplevel(shared.root_app)
         self.root.title(title)
         self.root.geometry(f"{width}x{height}")
         if platform.system() == "Windows":
@@ -41,6 +50,8 @@ class mainapp:
                 print("[Info] XBM icon not found, skipping window icon.")
         
         self.root.resizable(True, True)
+        # Map close button to quit()
+        self.root.protocol("WM_DELETE_WINDOW", lambda: quit())
         # Configure the grid to expand
         self.root.rowconfigure(0, weight=1)
         self.root.columnconfigure(0, weight=1)
@@ -51,23 +62,45 @@ class mainapp:
         )
         self.main.grid(row=0, column=0, sticky="nsew")
         self.main.pack_propagate(False)  # Prevent content from shrinking the frame
-        f.dbg(f"Initialized new main app with title: '{title}'")
+        f.dbg(f"Initialized new app with title: '{title}'")
 
-def error(msg: str) -> None:
+def init(title: str = "Remeny AI Teacher MAIN", width: int = 0, height: int = 0) -> None:
+    """
+    Initializes the GUI application.
+    """
+    f.dbg("Initializing GUI application...")
+    shared.root_app = ctk.CTk()
+    shared.root_app.title(title)
+    shared.root_app.geometry(f"{width}x{height}")
+    shared.root_app.withdraw()  # Hide the root window
+    f.dbg("GUI application initialized.")
+
+def error(msg: str, title: str = "Error") -> None:
     """
     Display an error message in a pop-up window.
     
     Args:
         msg (str): The error message to display.
+        title (str = "Error"): Window title
     """
-    messagebox.showerror("Error", "An error occured: " + msg)
+    messagebox.showerror(title, f"An error occured: {msg}")
+    
+def warn(msg: str, title: str = "Warning!") -> None:
+    """
+    Display a warning
+    
+    Args:
+        msg (str): The error message to display.
+        title (str = "Error"): Window title
+    """
+    messagebox.showwarning(title, f"Warning: {msg}")
 
 def clear_window(win: "ctk.CTk") -> None:
     """
     Clears all stuff inside a window
     """
     for widget in win.winfo_children():
-        widget.destroy()
+        widget.quit()
     f.dbg("Cleared window")
     
 def clear_frame(frame: ctk.CTkFrame) -> None:
@@ -106,7 +139,10 @@ def banner(win: "ctk.CTkFrame", heading: str, text: str, height: int = 65) -> No
 
     f.dbg(f"Added banner with heading: '{heading}' and text: '{text}'")
     
-def action_bar(win: "ctk.CTk", buttons: "tuple[tuple[str, callable], ...]") -> "tuple[ctk.CTkFrame, dict[str, ctk.CTkButton]]":
+def action_bar(
+    win: Union[ctk.CTk, ctk.CTkScrollableFrame, ctk.CTkFrame],
+    buttons: tuple[tuple[str, Callable], ...]
+) -> tuple[ctk.CTkFrame, dict[str, ctk.CTkButton]]:
     """
     Adds a horizontal action bar with buttons at the bottom of the window.
 
@@ -134,7 +170,7 @@ def action_bar(win: "ctk.CTk", buttons: "tuple[tuple[str, callable], ...]") -> "
 class CTkLabeledComboBox(ctk.CTkFrame):
     def __init__(
         self,
-        master: ctk.CTkFrame,
+        master: Union[ctk.CTkFrame, ctk.CTkScrollableFrame],
         text: str,
         values: list[str],
         default_value: str = "",
@@ -163,8 +199,12 @@ def quit() -> None:
     result = messagebox.askquestion("Confirm Action", "Are you sure you want to quit?")
     if result == "yes":
         f.dbg("GUI: Quitting application...")
-        ctk.CTk().destroy()  # Close the main window
-        f.quit(0)  # Call the quit function from function module
+        try:
+            if tk._default_root and tk._default_root.winfo_exists():
+                tk._default_root.destroy()
+        except Exception as e:
+            f.dbg(f"Exception during quit: {e}")
+        f.quit(0)
         
 def not_implemented() -> None:
     messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.")
