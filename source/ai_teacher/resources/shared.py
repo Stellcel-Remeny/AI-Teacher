@@ -10,16 +10,21 @@ global user_dir
 # ---[ Stuff needed to declare type ]--- #
 from configparser import ConfigParser
 from datetime import datetime
+from customtkinter import CTk
 
 # ---[ Shared variables type ]--- #
-config: ConfigParser
-init_time_formatted: datetime
+config: ConfigParser | None = None
+user_config: ConfigParser | None = None
+init_time_formatted: datetime | None = None
 
-init_time: float
+root_app: CTk | None = None
+
+init_time: float = 0.0
 
 build_number: int = 0
 
 config_file: str = ""
+user_config_file: str = ""
 app_dir: str = ""
 version: str = ""
 user_name: str = ""
