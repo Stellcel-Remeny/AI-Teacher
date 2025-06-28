@@ -17,10 +17,28 @@ user_names: list[str] = []
 user_directories: list[str] = f.list_dirs(os.path.join(shared.app_dir, "data"))
 
 # ---[ Login windows ]--- #
-def create_user() -> None:
+def create_user(enable_back_button: bool = False) -> bool | None:
+    """
+    This function creates a new user account.
+    It opens a new window where the user can enter a username.
+    If the username is valid, it adds the user to the list of users.
+    Returns True if the user was created successfully, False if the user creation was cancelled.
+    """
+    global return_value
+    return_value = None
     f.dbg("Launching user creation wizard")
+    def on_back() -> None:
+        """
+        Callback for the 'Go back' button.
+        Closes the user creation window and returns to the login window.
+        """
+        global return_value
+        f.dbg("Closing user creation window & returning to login window")
+        return_value = False
+        window.quit()
+    
     def on_create_user() -> None:
-        global user_names
+        global user_names, return_value
         new_user_name = Entry_id1.get().strip()
         if not new_user_name:
             gui.warn("Username cannot be empty.")
@@ -40,6 +58,7 @@ def create_user() -> None:
             f.dbg(f"Appending user directory...")
             user_directories.append(new_user_name.lower())
             f.dbg("Closing user creation window")
+            return_value = True
             window.quit()
     
     window = tk.Toplevel(shared.root_app)
@@ -47,10 +66,28 @@ def create_user() -> None:
     window.geometry("350x165")
     window.configure(bg="#FFFFFF")
     window.resizable(False, False)
+    window.protocol("WM_DELETE_WINDOW", gui.quit)
 
+    Button_id7 = ctk.CTkButton(
+        master=window,
+        text="Go back",
+        font=("undefined", 14),
+        text_color="#000000",
+        hover=True,
+        hover_color="#949494",
+        height=30,
+        width=95,
+        border_width=2,
+        corner_radius=6,
+        border_color="#000000",
+        bg_color="#FFFFFF",
+        fg_color="#F0F0F0",
+        command=on_back
+        )
+    Button_id7.place(x=5, y=120)
     Button_id6 = ctk.CTkButton(
         master=window,
-        text="Cancel",
+        text="Quit APP",
         font=("undefined", 14),
         text_color="#000000",
         hover=True,
@@ -122,10 +159,16 @@ def create_user() -> None:
         )
     Label_id3.place(x=20, y=90)
 
+    # Check if we want to enable the back button
+    if not enable_back_button:
+        Button_id7.place_forget()
+
     #run the main loop
     window.mainloop()
     #Exit
     window.destroy()
+    f.dbg(f"User creation window Return Val: {return_value}")
+    return return_value
     
 def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar) -> None:
     global user_names, user_directories
@@ -168,8 +211,11 @@ def display_login_prompt() -> str:
         """
         login_window.withdraw()
         f.dbg("Login window hidden")
-        new_user_name = create_user()
-        refresh_user_list(radio_frame, selected_user_var)
+        
+        if create_user(enable_back_button=True):
+            f.dbg("User created successfully, refreshing user list")
+            refresh_user_list(radio_frame, selected_user_var)
+        
         login_window.deiconify()
         f.dbg("Login window shown")
             
