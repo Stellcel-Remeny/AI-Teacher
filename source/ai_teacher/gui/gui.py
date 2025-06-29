@@ -170,7 +170,7 @@ class ActionBar:
     def get(self) -> tuple[ctk.CTkFrame, dict[str, ctk.CTkButton]]:
         return self.frame, self.button_refs
 
-class CTkLabeledComboBox(ctk.CTkFrame):
+class CTkLabelledComboBox(ctk.CTkFrame):
     def __init__(
         self,
         master: Union[ctk.CTkFrame, ctk.CTkScrollableFrame],
