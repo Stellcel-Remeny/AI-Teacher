@@ -146,6 +146,17 @@ class ActionBar:
         self.win = win
         self.buttons = buttons
         self.frame = self._create_action_frame()
+            
+        # Add version text
+        version_text = ctk.CTkLabel(
+            master=self.frame,
+            text="Remeny AI Teacher v" + shared.version + " ",
+            font=ctk.CTkFont(slant="italic"),
+            justify="left"
+        )
+        version_text.pack(side="left", padx=9)
+        
+        # Add buttons to the action bar
         self.button_refs: dict[str, ctk.CTkButton] = {}
         self._add_buttons()
 
