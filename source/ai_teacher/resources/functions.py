@@ -50,6 +50,23 @@ def dbg(text: str) -> None:
     print(log(formatted_text))
     
 def quit(return_code: int, text: str = "", dialog: bool = True) -> None:
+    """
+    This function quits the program with a given return code.
+    """
+    # Quit root_app if it exists and quick_exit is true
+    # Why? Sometimes if an error is shown, the background GUI will
+    # still function. So if this option is enabled, we will close the GUI
+    if shared.config.getboolean('GUI', 'quick_exit', fallback=True):
+        try:
+            if shared.root_app and shared.root_app.winfo_exists():
+                try:
+                    shared.root_app.destroy()
+                except Exception as e:
+                    dbg(f"Error destroying root_app: {e}")
+                    return_code = 1
+        except Exception:
+            pass  # window already destroyed
+    
     # Display error dialog if return_code != 0:
     if return_code != 0 and dialog:
         dbg(f"ERROR! RETURN CODE: {return_code}")
