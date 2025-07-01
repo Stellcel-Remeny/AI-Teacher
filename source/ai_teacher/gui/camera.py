@@ -25,7 +25,7 @@ def init(win: "gui.app") -> None:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
     win.root.title("Remeny AI Teacher - Camera Trainer")
-    gui.banner(win.main, "Camera selector", "Select a camera to use with MediaPipe.")
+    gui.Banner(win.main, "Camera selector", "Select a camera to use with MediaPipe.")
     action_buttons = gui.ActionBar(
         win.root,
         buttons=(("Next", gui.not_implemented), ("Cancel", gui.quit))
