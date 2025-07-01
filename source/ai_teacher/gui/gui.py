@@ -15,6 +15,77 @@ import customtkinter as ctk # type: ignore
 import os
 import platform
 
+# ---[ Initialization ]--- #
+
+def init(title: str = "Remeny AI Teacher MAIN", width: int = 0, height: int = 0) -> None:
+    """
+    Initializes the GUI application.
+    """
+    f.dbg("Initializing GUI application...")
+    shared.root_app = ctk.CTk()
+    shared.root_app.title(title)
+    shared.root_app.geometry(f"{width}x{height}")
+    shared.root_app.withdraw()  # Hide the root window
+    f.dbg("GUI application initialized.")
+
+# ---[ Primary functions ]--- #
+
+def error(msg: str, title: str = "Error") -> None:
+    """
+    Display an error message in a pop-up window.
+    
+    Args:
+        msg (str): The error message to display.
+        title (str = "Error"): Window title
+    """
+    messagebox.showerror(title, f"An error occured: {msg}") # type: ignore
+    
+def warn(msg: str, title: str = "Warning!") -> None:
+    """
+    Display a warning
+    
+    Args:
+        msg (str): The error message to display.
+        title (str = "Error"): Window title
+    """
+    messagebox.showwarning(title, f"Warning: {msg}") # type: ignore
+    
+def quit() -> None:
+    """
+    Asks if the user wants to quit the application.
+    """
+    result = messagebox.askquestion("Confirm Action", "Are you sure you want to quit?") # type: ignore
+    if result == "yes":
+        f.dbg("GUI: Quitting application...")
+        try:
+            shared.root_app.destroy() # type: ignore
+        except Exception as e:
+            f.dbg(f"Exception during quit: {e}")
+        f.quit(0)
+    
+# ---[ Secondary functions ]--- #
+
+def not_implemented() -> None:
+    messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.") # type: ignore
+
+def clear_window(win: "ctk.CTk") -> None:
+    """
+    Clears all stuff inside a window
+    """
+    for widget in win.winfo_children():
+        widget.quit()
+    f.dbg("Cleared window")
+    
+def clear_frame(frame: ctk.CTkFrame) -> None:
+    """
+    Clears all widgets inside the given frame.
+    """
+    for widget in frame.winfo_children(): # type: ignore
+        widget.destroy() # type: ignore
+    f.dbg("Cleared frame")
+    
+# ---[ Window classes ]--- #
+
 class app:
     """
     Application class for Remeny AI Teacher GUI.
@@ -58,81 +129,35 @@ class app:
         self.main.grid(row=0, column=0, sticky="nsew") # type: ignore
         self.main.pack_propagate(False)  # Prevent content from shrinking the frame
         f.dbg(f"Initialized new app with title: '{title}'")
-
-def init(title: str = "Remeny AI Teacher MAIN", width: int = 0, height: int = 0) -> None:
-    """
-    Initializes the GUI application.
-    """
-    f.dbg("Initializing GUI application...")
-    shared.root_app = ctk.CTk()
-    shared.root_app.title(title)
-    shared.root_app.geometry(f"{width}x{height}")
-    shared.root_app.withdraw()  # Hide the root window
-    f.dbg("GUI application initialized.")
-
-def error(msg: str, title: str = "Error") -> None:
-    """
-    Display an error message in a pop-up window.
     
-    Args:
-        msg (str): The error message to display.
-        title (str = "Error"): Window title
-    """
-    messagebox.showerror(title, f"An error occured: {msg}") # type: ignore
-    
-def warn(msg: str, title: str = "Warning!") -> None:
-    """
-    Display a warning
-    
-    Args:
-        msg (str): The error message to display.
-        title (str = "Error"): Window title
-    """
-    messagebox.showwarning(title, f"Warning: {msg}") # type: ignore
+class Banner:
+    def __init__(self, win: Union["ctk.CTkFrame", "ctk.CTkScrollableFrame"], heading: str, text: str, height: int = 65):
+        """
+        A banner widget that displays a heading and a subtext, horizontally stretchable.
+        """
+        win.grid_columnconfigure(0, weight=1)
 
-def clear_window(win: "ctk.CTk") -> None:
-    """
-    Clears all stuff inside a window
-    """
-    for widget in win.winfo_children():
-        widget.quit()
-    f.dbg("Cleared window")
-    
-def clear_frame(frame: ctk.CTkFrame) -> None:
-    """
-    Clears all widgets inside the given frame.
-    """
-    for widget in frame.winfo_children(): # type: ignore
-        widget.destroy() # type: ignore
-    f.dbg("Cleared frame")
-    
-def banner(win: Union["ctk.CTkFrame", "ctk.CTkScrollableFrame"], heading: str, text: str, height: int = 65) -> None:
-    """
-    Adds some user-friendly text at the top, expanding horizontally with window resize.
-    """
-    win.grid_columnconfigure(0, weight=1)
+        self.frame = ctk.CTkFrame(master=win, height=height)
+        self.frame.grid(row=0, column=0, padx=5, pady=5, sticky="ew")  # type: ignore
+        self.frame.pack_propagate(False)
 
-    frame = ctk.CTkFrame(master=win, height=height)
-    frame.grid(row=0, column=0, padx=5, pady=5, sticky="ew") # type: ignore
-    frame.pack_propagate(False)  # Prevent content from shrinking the frame
+        self.label_heading = ctk.CTkLabel(
+            master=self.frame,
+            text=heading,
+            font=ctk.CTkFont(size=20, weight="bold"),
+            justify="left"
+        )
+        self.label_heading.pack(anchor="w", padx=14, pady=(10, 0))  # type: ignore
 
-    label_heading = ctk.CTkLabel(
-        master=frame,
-        text=heading,
-        font=ctk.CTkFont(size=20, weight="bold"),
-        justify="left"
-    )
-    label_heading.pack(anchor="w", padx=14, pady=(10, 0)) # type: ignore
+        self.label_text = ctk.CTkLabel(
+            master=self.frame,
+            text=text,
+            font=ctk.CTkFont(size=14),
+            justify="left"
+        )
+        self.label_text.pack(anchor="w", padx=16, pady=(0, 5))  # type: ignore
 
-    label_text = ctk.CTkLabel(
-        master=frame,
-        text=text,
-        font=ctk.CTkFont(size=14),
-        justify="left"
-    )
-    label_text.pack(anchor="w", padx=16, pady=(0, 5))  # type: ignore
-
-    f.dbg(f"Added banner with heading: '{heading}' and text: '{text}'")
+        f.dbg(f"Added banner with heading: '{heading}' and text: '{text}'")
     
 class ActionBar:
     def __init__(
@@ -205,19 +230,3 @@ class CTkLabelledComboBox(ctk.CTkFrame):
 
     def set(self, value: str):
         self.combobox.set(value)
-
-def quit() -> None:
-    """
-    Asks if the user wants to quit the application.
-    """
-    result = messagebox.askquestion("Confirm Action", "Are you sure you want to quit?") # type: ignore
-    if result == "yes":
-        f.dbg("GUI: Quitting application...")
-        try:
-            shared.root_app.destroy() # type: ignore
-        except Exception as e:
-            f.dbg(f"Exception during quit: {e}")
-        f.quit(0)
-        
-def not_implemented() -> None:
-    messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.") # type: ignore
