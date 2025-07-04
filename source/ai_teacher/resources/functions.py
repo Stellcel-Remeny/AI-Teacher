@@ -116,6 +116,7 @@ def update_ini(ini_file: str, section: str, key: str, value: str) -> None:
     from configupdater import ConfigUpdater
     
     updater: ConfigUpdater = ConfigUpdater()
+    dbg(f"Updating ini file '{ini_file}' with value '{value}' for section '{section}' and key '{key}'")
     updater.read(ini_file) # type: ignore
 
     if not updater.has_section(section): # type: ignore
@@ -180,36 +181,6 @@ def list_dirs(path: str) -> list[str]:
     except Exception as e:
         dbg(f"Error listing directories in {path}: {e}")
         return []
-    
-def show_notices(disclaimer_file: str, license_name: str) -> None:
-    """
-    Outputs disclaimer file, and also tells
-    that the software is licensed under 'license'
-    TODO: Make this a GUI dialog
-    """
-    # Show disclaimer
-    if not shared.user_config.getboolean('Main', 'disclaimer_accepted', fallback=False):
-        with open(disclaimer_file, "r", encoding="utf-8") as f:
-            disclaimer_text = f.read()
-            
-        print(disclaimer_text)
-        if not yesno("Do you accept this disclaimer?"):
-            print("Closing due to user not accepting the disclaimer...")
-            quit(1,"You must accept the disclaimer to continue.")
-        
-        update_ini(shared.user_config_file, 'Main', 'disclaimer_accepted', 'true')
-            
-    # Show license
-    if not shared.user_config.getboolean('Main', 'license_accepted', fallback=False):
-        print ("\n ---------------------- ")
-        print(f"This program is licensed under the {license_name} license.")
-        print("You can find the full license text in 'LICENSE.txt'.\n")
-        
-        if not yesno("Do you accept the license mentioned above?"):
-            print("Closing due to user not accepting the license mentioned above...")
-            quit(1, "You must accept the license to continue.")
-        
-        update_ini(shared.user_config_file, 'Main', 'license_accepted', 'true')
         
 # ---[ User login ]--- #
 def login() -> bool:
@@ -254,6 +225,8 @@ def init() -> None:
     """
     Initialize our program
     """
+    from ai_teacher.resources.notices import show_notices
+    
     global logfile_name, logfile_directory
     # Variable initialization
     shared.init_time = time.time()
