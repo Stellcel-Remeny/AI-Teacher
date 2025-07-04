@@ -74,7 +74,7 @@ def clear_window(win: "ctk.CTk") -> None:
     """
     for widget in win.winfo_children():
         widget.quit()
-    f.dbg("Cleared window")
+    f.dbg(f"Cleared window {win.winfo_name()}")
     
 def clear_frame(frame: ctk.CTkFrame) -> None:
     """
@@ -82,7 +82,7 @@ def clear_frame(frame: ctk.CTkFrame) -> None:
     """
     for widget in frame.winfo_children(): # type: ignore
         widget.destroy() # type: ignore
-    f.dbg("Cleared frame")
+    f.dbg(f"Cleared frame {frame.winfo_name()}")
     
 # ---[ Window classes ]--- #
 
@@ -128,7 +128,35 @@ class app:
         )
         self.main.grid(row=0, column=0, sticky="nsew") # type: ignore
         self.main.pack_propagate(False)  # Prevent content from shrinking the frame
+        
+        # Banner and action bar
+        self.banner_frame = Banner(self.main, "Placeholder", "Edit these text using '.banner()'")
         f.dbg(f"Initialized new app with title: '{title}'")
+    
+    def banner(self, heading: str = "", text: str = "") -> None:
+        """
+        Edits the banner text and subtext the main window.
+        
+        Args:
+            heading (str): The heading text for the banner.
+            text (str): The subtext for the banner.
+        """
+        self.banner_frame.label_heading.configure(text=heading)
+        self.banner_frame.label_text.configure(text=text)
+        
+    def action_bar(self, buttons: tuple[tuple[str, Callable[[], None]], ...]) -> None:
+        """
+        Adds/Re-adds an action bar with buttons to the main window.
+        
+        Args:
+            buttons (tuple[tuple[str, Callable[[], None]], ...]): A tuple of button text and command pairs.
+        """
+        if hasattr(self, "action_bar_frame") and self.action_bar_frame:
+            self.action_bar_frame.grid_forget()  # Remove the old action bar if it exists
+            self.action_bar_frame.destroy()  # Destroy the old action bar frame if it exists
+        
+        self.action_bar_frame = ActionBar(self.root, buttons)
+        self.buttons = self.action_bar_frame.button_refs
     
 class Banner:
     def __init__(self, win: Union["ctk.CTkFrame", "ctk.CTkScrollableFrame"], heading: str, text: str, height: int = 65):
@@ -157,7 +185,7 @@ class Banner:
         )
         self.label_text.pack(anchor="w", padx=16, pady=(0, 5))  # type: ignore
 
-        f.dbg(f"Added banner with heading: '{heading}' and text: '{text}'")
+        f.dbg(f"Banner heading: '{heading}', text: '{text}'")
     
 class ActionBar:
     def __init__(
@@ -202,9 +230,6 @@ class ActionBar:
             self.button_refs[text] = button
 
         f.dbg(f"Added action bar with buttons: {self.buttons}")
-
-    def get(self) -> tuple[ctk.CTkFrame, dict[str, ctk.CTkButton]]:
-        return self.frame, self.button_refs
 
 class CTkLabelledComboBox(ctk.CTkFrame):
     def __init__(
