@@ -16,7 +16,7 @@ from PIL import Image, ImageTk # type: ignore
 
 def init(win: "gui.app") -> None:
     def on_combobox_selected(cam_name: str) -> None:
-        action_buttons["Next"].configure(state="enabled") # type: ignore
+        win.buttons["Next"].configure(state="enabled") # type: ignore
         # Find camera index by name
         index = dict((name, idx) for idx, name in cameras).get(cam_name)
         if index is not None:
@@ -25,13 +25,10 @@ def init(win: "gui.app") -> None:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
     win.root.title("Remeny AI Teacher - Camera Trainer")
-    gui.Banner(win.main, "Camera selector", "Select a camera to use with MediaPipe.")
-    action_buttons = gui.ActionBar(
-        win.root,
-        buttons=(("Next", gui.not_implemented), ("Cancel", gui.quit))
-    ).get()[1]
+    win.banner("Camera selector", "Select a camera to use with MediaPipe.")
+    win.action_bar(buttons=(("Next", gui.not_implemented), ("Cancel", gui.quit)))
     
-    action_buttons["Next"].configure(state="disabled") # type: ignore
+    win.buttons["Next"].configure(state="disabled")
     
     # Get the available cameras.
     # User should be able to select which one to use.
