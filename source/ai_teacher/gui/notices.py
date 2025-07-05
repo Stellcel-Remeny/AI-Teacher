@@ -31,7 +31,7 @@ def show_notices_gui(disclaimer_text: str,
     win.root.title("Remeny AI Teacher")
     
     win.banner("Notices", "Please read the following before proceeding.")
-    win.action_bar(buttons=(("Next", on_action_next), ("Cancel", gui.quit)))
+    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", on_action_next)))
     win.buttons["Next"].configure(state="disabled")
     
     # Common button check for license and disclaimer acceptance
