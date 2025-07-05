@@ -247,3 +247,5 @@ def init() -> None:
         quit(1, "Login failure.")
     
     show_notices(f"{shared.app_dir}/text/DISCLAIMER.txt", "GPLv3")
+    dbg("Initialization complete.")
+    return
