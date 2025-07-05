@@ -48,15 +48,15 @@ def create_user(enable_back_button: bool = False) -> bool | None:
             gui.warn("Username must be at least 3 characters long.")
         elif len(new_user_name) > 20:
             gui.warn("Username must be at most 20 characters long.")
-        elif not new_user_name.isalnum():
-            gui.warn("Username can only contain alphanumeric characters.")
-        elif new_user_name.lower() in [name.lower() for name in user_directories]:
-            gui.warn(f"User directory '{new_user_name.lower()}' already exists. Please choose a different username.")
+        elif not all(c.isalnum() or c.isspace() for c in new_user_name):
+            gui.warn("Username can only contain alphanumeric and space characters.")
+        elif new_user_name.replace(" ", "_").lower() in [name.lower() for name in user_directories]:
+            gui.warn(f"User directory '{new_user_name.replace(' ', '_').lower()}' already exists. Please choose a different username.")
         else:
             f.dbg(f"Appending new user: {new_user_name}")
             user_names.append(new_user_name)
             f.dbg(f"Appending user directory...")
-            user_directories.append(new_user_name.lower())
+            user_directories.append(new_user_name.replace(" ", "_").lower())
             f.dbg("Closing user creation window")
             return_value = True
             window.quit()
