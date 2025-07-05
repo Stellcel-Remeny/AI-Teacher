@@ -143,6 +143,7 @@ class app:
         """
         self.banner_frame.label_heading.configure(text=heading)
         self.banner_frame.label_text.configure(text=text)
+        f.dbg(f"Updated banner with heading: '{heading}' and text: '{text}'")
         
     def action_bar(self, buttons: tuple[tuple[str, Callable[[], None]], ...]) -> None:
         """
