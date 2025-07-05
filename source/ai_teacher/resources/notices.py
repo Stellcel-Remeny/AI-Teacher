@@ -1,49 +1,37 @@
 #
 # This file shows disclaimer and license information
-# as either a GUI window or a console output.
+# as either a GUI window (from gui.notices) or a console output.
 #
 
 # ---[ Libraries ]--- #
 from ai_teacher.resources import shared
 from ai_teacher.resources import functions as f
 from ai_teacher.gui import gui
+from ai_teacher.gui import notices as gui_notices
+
+from typing import Union
 
 import os
 
-def show_notices_gui() -> "gui.app":
+# ---[ Definitions ]--- #
+def show_disclaimer(disclaimer_text: str) -> None:
     """
-    Creates a window to show the disclaimer and license information.
+    Shows the disclaimer to the user via commandline.
     """
-    win = gui.app()
-    win.root.title("Remeny AI Teacher")
-    
-    win.main = gui.Frame(win.root, "Notices", "Please read the following notices before proceeding.")
-    
-    return win
-
-def show_disclaimer(disclaimer_file: str) -> None:
-    """
-    Shows the disclaimer to the user.
-    """
-    if not os.path.isfile(disclaimer_file):
-        f.quit(1, f"Disclaimer file '{disclaimer_file}' not found. Please ensure it exists in the expected location.")
-    
-    with open(disclaimer_file, "r", encoding="utf-8") as file:
-        disclaimer_text = file.read()
-            
-        print(disclaimer_text)
-        if not f.yesno("Do you accept this disclaimer?"):
-            print("Closing due to user not accepting the disclaimer...")
-            f.quit(1,"You must accept the disclaimer to continue.")
+    print(disclaimer_text)
+    if not f.yesno("Do you accept this disclaimer?"):
+        print("Closing due to user not accepting the disclaimer...")
+        f.quit(1,"You must accept the disclaimer to continue.")
         
-        f.update_ini(shared.user_config_file, 'Main', 'disclaimer_accepted', 'true')
+    f.update_ini(shared.user_config_file, 'Main', 'disclaimer_accepted', 'true')
 
-def show_license(license_name: str) -> None:
-    # Show license
+def show_license(license_text: str) -> None:
+    """
+    Shows the license to the user via commandline.
+    """
     if not shared.user_config.getboolean('Main', 'license_accepted', fallback=False):
         print ("\n ---------------------- ")
-        print(f"This program is licensed under the {license_name} license.")
-        print("You can find the full license text in 'LICENSE.txt'.\n")
+        print(license_text)
         
         if not f.yesno("Do you accept the license mentioned above?"):
             print("Closing due to user not accepting the license mentioned above...")
@@ -52,8 +40,34 @@ def show_license(license_name: str) -> None:
         f.update_ini(shared.user_config_file, 'Main', 'license_accepted', 'true')
         
 def show_notices(disclaimer_file: str, license_name: str) -> None:
-    if not shared.user_config.getboolean('Main', 'disclaimer_accepted', fallback=False):
-        show_disclaimer(disclaimer_file)
+    """
+    Shows the notices to the user, either via GUI or console.
+    """
+    use_gui: bool = shared.config.getboolean('GUI', 'notices', fallback=True)
+    
+    # Prepare variables
+    if not os.path.isfile(disclaimer_file):
+        f.quit(1, f"Disclaimer file '{disclaimer_file}' not found. Please ensure it exists in the expected location.")
+    
+    with open(disclaimer_file, "r", encoding="utf-8") as file:
+        disclaimer_text: str = file.read()
+    
+    license_text: str = (
+        f"This program is licensed under the {license_name} license.\n"
+        "You can find the full license text in 'LICENSE.txt'.\n"
+    )
+    
+    disclaimer_accepted: bool = shared.user_config.getboolean('Main', 'disclaimer_accepted', fallback=False)
+    license_accepted: bool = shared.user_config.getboolean('Main', 'license_accepted', fallback=False)
+    
+    # Check if we should use GUI
+    if use_gui and (not disclaimer_accepted or not license_accepted):
+        gui_notices.show_notices_gui(disclaimer_text, disclaimer_accepted, license_text, license_accepted)
+        return
+    
+    # The following are console-based notices
+    if not disclaimer_accepted:
+        show_disclaimer(disclaimer_text)
         
-    if not shared.user_config.getboolean('Main', 'license_accepted', fallback=False):
-        show_license(license_name)
+    if not license_accepted:
+        show_license(license_text)
