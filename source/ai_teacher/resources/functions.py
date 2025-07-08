@@ -43,7 +43,7 @@ def dbg(text: str) -> None:
     This function outputs text given to it to terminal,
     if debugging is enabled.
     """
-    if not shared.config.getboolean('Debug', 'enable_debug', fallback=False):
+    if not shared.debug:
         return
     
     formatted_text: str = f"\033[31m[Debug]\033[32m {text} \033[0m"
@@ -88,7 +88,7 @@ def clear_screen():
     """
     This function clears the terminal
     """
-    if not shared.config.getboolean('Debug', 'clear_terminal_on_startup', fallback=False):
+    if not shared.config.getboolean('Debug', 'clear_terminal_on_startup', fallback=True):
         return
     
     dbg("Clearing screen...")
@@ -225,8 +225,6 @@ def init() -> None:
     """
     Initialize our program
     """
-    from ai_teacher.resources.notices import show_notices
-    
     global logfile_name, logfile_directory
     # Variable initialization
     shared.init_time = time.time()
@@ -234,12 +232,26 @@ def init() -> None:
     shared.app_dir = os.path.dirname(os.path.abspath(str(getattr(sys.modules['__main__'], '__file__', ''))))
     shared.config_file = os.path.join(shared.app_dir, "settings", "configuration.ini")
     shared.config = load_config(shared.config_file)
-    logfile_directory = os.path.join(shared.app_dir, shared.config.get('Debug', 'log_directory', fallback='logfiles'))
-    logfile_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
-    logfile_name = os.path.join(logfile_directory, logfile_name)
+    shared.debug = shared.config.getboolean('Debug', 'enable_debug', fallback=False)
+    shared.log = shared.config.getboolean('Debug', 'enable_logging', fallback=False)
+    
+    if shared.log:
+        logfile_directory = os.path.join(shared.app_dir, shared.config.get('Debug', 'log_directory', fallback='logfiles'))
+        logfile_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
+        logfile_name = os.path.join(logfile_directory, logfile_name)
+    
+    # Libraries (put here so shared variables are accessible)
+    from ai_teacher.resources.notices import show_notices
+    from ai_teacher.resources import sounds
     
     clear_screen()
     display_version()
+    
+    try:
+        sounds.init()
+    except Exception as e:
+        quit(1, e)
+    
     create_folders()
     gui.init()
     
