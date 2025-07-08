@@ -38,6 +38,7 @@ def error(msg: str, title: str = "Error") -> None:
         msg (str): The error message to display.
         title (str = "Error"): Window title
     """
+    f.dbg(f"Error: {msg}")
     messagebox.showerror(title, f"An error occured: {msg}") # type: ignore
     
 def warn(msg: str, title: str = "Warning!") -> None:
@@ -48,6 +49,7 @@ def warn(msg: str, title: str = "Warning!") -> None:
         msg (str): The error message to display.
         title (str = "Error"): Window title
     """
+    f.dbg(f"Warning: {msg}")
     messagebox.showwarning(title, f"Warning: {msg}") # type: ignore
     
 def quit() -> None:
@@ -85,7 +87,6 @@ def clear_frame(frame: ctk.CTkFrame) -> None:
     f.dbg(f"Cleared frame {frame.winfo_name()}")
     
 # ---[ Window classes ]--- #
-
 class app:
     """
     Application class for Remeny AI Teacher GUI.
@@ -202,13 +203,13 @@ class ActionBar:
         self.frame = self._create_action_frame()
             
         # Add version text
-        version_text = ctk.CTkLabel(
+        self.text = ctk.CTkLabel(
             master=self.frame,
-            text="Remeny AI Teacher v" + shared.version + " ",
+            text="Remeny AI Teacher v" + shared.version + (" [DEBUG MODE] " if shared.debug else " ") ,
             font=ctk.CTkFont(slant="italic"),
             justify="left"
         )
-        version_text.pack(side="left", padx=9)
+        self.text.pack(side="left", padx=9)
         
         # Add buttons to the action bar
         self.button_refs: dict[str, ctk.CTkButton] = {}
@@ -256,3 +257,44 @@ class CTkLabelledComboBox(ctk.CTkFrame):
 
     def set(self, value: str):
         self.combobox.set(value)
+
+class CTkNumberEntry(ctk.CTkFrame):
+    def __init__(self, master=None, min_val=0, max_val=100, step=1, **entry_kwargs):
+        super().__init__(master, fg_color="transparent")
+        self.min_val = min_val
+        self.max_val = max_val
+        self.step = step
+
+        self.entry = ctk.CTkEntry(self, width=60, justify="center", **entry_kwargs)
+        self.entry.insert(0, str(min_val))
+        self.entry.grid(row=0, column=0, rowspan=2, padx=(0, 5))
+
+        up_button = ctk.CTkButton(self, text="▲", width=24, height=16, command=self.increment)
+        down_button = ctk.CTkButton(self, text="▼", width=24, height=16, command=self.decrement)
+
+        up_button.grid(row=0, column=1)
+        down_button.grid(row=1, column=1)
+
+        # Only allow digits
+        vcmd = self.register(self._validate_input)
+        self.entry.configure(validate="key", validatecommand=(vcmd, "%S"))
+
+    def _validate_input(self, char):
+        return char.isdigit()
+
+    def get(self) -> int:
+        try:
+            return int(self.entry.get())
+        except ValueError:
+            return self.min_val
+
+    def set(self, value: int):
+        value = max(self.min_val, min(self.max_val, value))
+        self.entry.delete(0, "end")
+        self.entry.insert(0, str(value))
+
+    def increment(self):
+        self.set(self.get() + self.step)
+
+    def decrement(self):
+        self.set(self.get() - self.step)
