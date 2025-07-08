@@ -6,6 +6,7 @@
 # ---[ Libraries ]--- #
 from ai_teacher.resources import functions as f
 from ai_teacher.resources import shared
+from ai_teacher.resources.sounds import sounds
 from ai_teacher.backend import camera_backend
 from ai_teacher.gui import gui
 
@@ -21,6 +22,7 @@ import threading
 cap = None
 frame_loop_id = None
 face_mesh = None
+capture_countdown_id: str | None = None
 
 # Store latest detected face points
 latest_face_points = {
@@ -31,19 +33,21 @@ latest_face_points = {
 
 def init(win: "gui.app") -> None:
     def on_combobox_selected(cam_name: str) -> None:
-        win.buttons["Next"].configure(state="enabled") # type: ignore
+        capture_button.configure(text="Capture", state="normal") # type: ignore
         # Find camera index by name
         index = dict((name, idx) for idx, name in cameras).get(cam_name)
         if index is not None:
-            open_face_track(image_label, index)
+            open_face_track(image_label, index, debug_label=win.action_bar_frame.text)
         else:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
+    # Basic window init
     win.root.title("Remeny AI Teacher - Camera Trainer")
     win.banner("Camera calibrator", "Select a camera to train your Head positons.")
     win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.not_implemented)))
     win.buttons["Next"].configure(state="disabled")
     
+    # Populate the camera combobox
     cameras = camera_backend.list_cameras()
     if not cameras:
         f.quit(1, "No cameras are available. Check if you have permissions, or connect a camera if you don't have one.")
@@ -54,6 +58,7 @@ def init(win: "gui.app") -> None:
     combobox_cam_selector.combobox.configure(command = on_combobox_selected) # type: ignore
     combobox_cam_selector.grid(padx=50, pady=20, sticky="w") # type: ignore
     
+    # Instruction label (the one that displays on top of camera preview frame)
     instruction_label = ctk.CTkLabel(
         master=win.main,
         text="Loading...",
@@ -62,33 +67,84 @@ def init(win: "gui.app") -> None:
     )
     instruction_label.grid(pady=(0, 5))
     
+    # Camera preview frame
     image_frame = ctk.CTkFrame(win.main, width=500, height=500)
     image_frame.grid_propagate(False)
     image_frame.grid(pady=20)
     
-    image_label = ctk.CTkLabel(image_frame, text="")
+    image_label = ctk.CTkLabel(image_frame, text="", font=("Verdana", 80))
     image_label.grid(row=0, column=0, sticky="nsew")
     image_frame.rowconfigure(0, weight=1)
     image_frame.columnconfigure(0, weight=1)
     
     def on_capture() -> None:
+        global capture_countdown_id
+        
+        if capture_countdown_id is not None:
+            capture_button.after_cancel(capture_countdown_id)
+            capture_countdown_id = None
+            capture_button.configure(text="Capture")
+            image_label.configure(text="")
+            f.dbg("Cancelled existing capture opteration.")
+            return
+            
         if None in latest_face_points.values():
             f.dbg("Face points not available yet.")
             return
-        camera_backend.capture_face_points(
-            [left_x, left_y, left_z],
-            [right_x, right_y, right_z],
-            [nose_x, nose_y, nose_z]
-        )
+
+        try:
+            countdown_num = int(capture_delay_entry.get())
+        except Exception:
+            gui.warn("Invalid number input.")
+            return
+
+        # Start countdown
+        def countdown(n: int):
+            global capture_countdown_id
+            if n <= 0:
+                f.dbg(f"Capturing...")
+                capture_button.configure(text="Capture")
+                image_label.configure(text="")
+                capture_countdown_id = None
+                
+                if None in latest_face_points.values():
+                    gui.warn("Face points not found.")
+                    return
+
+                camera_backend.capture_face_points(
+                    [left_x, left_y, left_z],
+                    [right_x, right_y, right_z],
+                    [nose_x, nose_y, nose_z]
+                )
+            else:
+                f.dbg(f"Seconds remaining before capture: {n}")
+                sounds["tick1"].play()
+                image_label.configure(text=str(n))
+                capture_button.configure(text=str(n))
+                capture_countdown_id = capture_button.after(1000, countdown, n - 1)
+
+        countdown(countdown_num)
         
-    capture_button = ctk.CTkButton(win.main, text="Capture", command=on_capture)
-    capture_button.grid()
+    # Frame which holds capture button & delay input box
+    control_frame = ctk.CTkFrame(win.main)
+    control_frame.grid()
+    
+    capture_button = ctk.CTkButton(control_frame, text="Select a camera", command=on_capture, state="disabled")
+    capture_button.grid(row=0, column=0, padx=10, pady=10)
+
+    capture_delay_label = ctk.CTkLabel(control_frame, text="Delay:")
+    capture_delay_label.grid(row=0, column=1)
+
+    capture_delay_entry = gui.CTkNumberEntry(control_frame)
+    capture_delay_entry.grid(row=0, column=2, padx=10, pady=10)
     
     instruction_label.configure(text="Please select a camera from above.\nAfter selecting, instructions will appear here. For capture button, scroll down.")
     
     win.root.mainloop()
 
-def open_face_track(image_label: "ctk.CTkLabel", camera_index: int) -> None:
+def open_face_track(image_label: "ctk.CTkLabel",
+                    camera_index: int,
+                    debug_label: Union["ctk.CTkLabel", None] = None) -> None:
     global cap, frame_loop_id, face_mesh
     global nose_x, nose_y, nose_z, left_x, left_y, left_z, right_x, right_y, right_z
 
@@ -126,12 +182,21 @@ def open_face_track(image_label: "ctk.CTkLabel", camera_index: int) -> None:
             left_x, left_y, left_z = left.x, left.y, left.z
             right_x, right_y, right_z = right.x, right.y, right.z
 
+            # Update face points dictionary
+            latest_face_points["nose"] = (nose_x, nose_y, nose_z)
+            latest_face_points["left_iris"] = (left_x, left_y, left_z)
+            latest_face_points["right_iris"] = (right_x, right_y, right_z)
+
             for pt, color in zip([nose, left, right], [(0,255,0), (255,0,0), (0,0,255)]):
                 x, y = int(pt.x * w), int(pt.y * h)
                 cv2.circle(img_rgb, (x, y), 3, color, -1)
 
-            direction = camera_backend.get_gaze_direction(nose, left, right)
-            print(direction)
+            if shared.debug:
+                debug_text: str = (f"NOSE(x={nose_x}, y={nose_y}, z={nose_z}) ",
+                                   f"LEFTEYE(x={left_x}, y={left_y}, z={left_z}) ",
+                                   f"RIGHTEYE(x={right_x}, y={right_y}, z={right_z}) ")
+                
+                debug_label.configure(text=debug_text)
 
         if image_label.winfo_width() > 0:
             img = Image.fromarray(img_rgb)
