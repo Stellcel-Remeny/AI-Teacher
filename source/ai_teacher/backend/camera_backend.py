@@ -55,3 +55,8 @@ def check_camera(camera: "cv2.VideoCapture") -> bool:
     
     f.dbg("Camera check successful.")
     return True
+
+def capture_face_points(left_eye, right_eye, nose) -> None:
+    print("LEFT:", left_eye)
+    print("RIGHT:", right_eye)
+    print("NOSE:", nose)
