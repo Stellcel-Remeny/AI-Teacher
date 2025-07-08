@@ -43,7 +43,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        f.quit(130, "Quitting on keyboard interruption", dialog = False)
+        f.quit(130, "Quitting on keyboard interruption", dialog=False)
     except Exception as e:
         f.dbg("Error traceback:")
         f.dbg(traceback.format_exc())
