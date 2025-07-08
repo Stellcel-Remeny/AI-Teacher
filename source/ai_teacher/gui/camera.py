@@ -32,18 +32,29 @@ latest_face_points = {
 }
 
 def init(win: "gui.app") -> None:
+    """
+    This function shows camera window
+    """
+    instruction_updated: bool = False
+    
     def on_combobox_selected(cam_name: str) -> None:
         capture_button.configure(text="Capture", state="normal") # type: ignore
         # Find camera index by name
         index = dict((name, idx) for idx, name in cameras).get(cam_name)
         if index is not None:
             open_face_track(image_label, index, debug_label=win.action_bar_frame.text)
+            # Update instruction label
+            nonlocal instruction_updated
+            if not instruction_updated:
+                instruction_label.configure(text=camera_backend.user_instructions[0])
+                instruction_updated = True
+                f.dbg(f"First instruction added: {camera_backend.user_instructions[0]}")
         else:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
     # Basic window init
     win.root.title("Remeny AI Teacher - Camera Trainer")
-    win.banner("Camera calibrator", "Select a camera to train your Head positons.")
+    win.banner("Camera calibrator", "Select a camera and train the machine to know where you are looking.")
     win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.not_implemented)))
     win.buttons["Next"].configure(state="disabled")
     
@@ -89,7 +100,7 @@ def init(win: "gui.app") -> None:
             return
             
         if None in latest_face_points.values():
-            f.dbg("Face points not available yet.")
+            gui.warn("Face points not available yet.")
             return
 
         try:
@@ -102,7 +113,6 @@ def init(win: "gui.app") -> None:
         def countdown(n: int):
             global capture_countdown_id
             if n <= 0:
-                f.dbg(f"Capturing...")
                 capture_button.configure(text="Capture")
                 image_label.configure(text="")
                 capture_countdown_id = None
@@ -111,11 +121,21 @@ def init(win: "gui.app") -> None:
                     gui.warn("Face points not found.")
                     return
 
-                camera_backend.capture_face_points(
+                next_instruction: str = camera_backend.capture_face_points(
                     [left_x, left_y, left_z],
                     [right_x, right_y, right_z],
                     [nose_x, nose_y, nose_z]
                 )
+                
+                # Update instruction label
+                if next_instruction == "END":
+                    # We reached end of instructions (hopefully)
+                    instruction_label.configure(text="Awesome! You may continue by clicking 'Next'.")
+                    capture_button.configure(state="disabled")
+                    win.buttons['Next'].configure(state="normal")
+                    f.dbg("Camera section seems to be finished.")
+                else:
+                    instruction_label.configure(text=next_instruction)
             else:
                 f.dbg(f"Seconds remaining before capture: {n}")
                 sounds["tick1"].play()
@@ -178,9 +198,9 @@ def open_face_track(image_label: "ctk.CTkLabel",
             lms = results.multi_face_landmarks[0].landmark
             nose, left, right = lms[1], lms[468], lms[473]
 
-            nose_x, nose_y, nose_z = nose.x, nose.y, nose.z
-            left_x, left_y, left_z = left.x, left.y, left.z
-            right_x, right_y, right_z = right.x, right.y, right.z
+            nose_x, nose_y, nose_z = round(nose.x, 5), round(nose.y, 5), round(nose.z, 5)
+            left_x, left_y, left_z = round(left.x, 5), round(left.y, 5), round(left.z, 5)
+            right_x, right_y, right_z = round(right.x, 5), round(right.y, 5), round(right.z, 5)
 
             # Update face points dictionary
             latest_face_points["nose"] = (nose_x, nose_y, nose_z)
@@ -197,6 +217,11 @@ def open_face_track(image_label: "ctk.CTkLabel",
                                    f"RIGHTEYE(x={right_x}, y={right_y}, z={right_z}) ")
                 
                 debug_label.configure(text=debug_text)
+        else:
+            # Clear previous values
+            latest_face_points["nose"] = None
+            latest_face_points["left_iris"] = None
+            latest_face_points["right_iris"] = None
 
         if image_label.winfo_width() > 0:
             img = Image.fromarray(img_rgb)
