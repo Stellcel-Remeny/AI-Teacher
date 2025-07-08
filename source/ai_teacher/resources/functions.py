@@ -38,7 +38,7 @@ def log(text: str) -> str:
     
     return text
     
-def dbg(text: str) -> None:
+def dbg(*args) -> None:
     """
     This function outputs text given to it to terminal,
     if debugging is enabled.
@@ -46,6 +46,7 @@ def dbg(text: str) -> None:
     if not shared.debug:
         return
     
+    text = " ".join(str(arg) for arg in args)
     formatted_text: str = f"\033[31m[Debug]\033[32m {text} \033[0m"
     print(log(formatted_text))
     
