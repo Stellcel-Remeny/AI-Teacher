@@ -1,7 +1,4 @@
 python-dotenv
-huggingface_hub
-gtts
-SpeechRecognition
 opencv-python
 pillow
 customtkinter
@@ -9,3 +6,4 @@ pygrabber
 scikit-learn
 configupdater
 mediapipe
+pygame
