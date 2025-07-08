@@ -12,13 +12,16 @@ from configparser import ConfigParser
 from datetime import datetime
 from customtkinter import CTk # type: ignore
 
-# ---[ Shared variables type ]--- #
+# ---[ Shared variables ]--- #
 config: ConfigParser  = ConfigParser()
 user_config: ConfigParser = ConfigParser()
 
 init_time_formatted: datetime | None = None
 
 root_app: CTk | None = None
+
+debug: bool = False
+log: bool = False
 
 init_time: float = 0.0
 
