@@ -70,21 +70,23 @@ def quit() -> None:
 def not_implemented() -> None:
     messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.") # type: ignore
 
-def clear_window(win: "ctk.CTk") -> None:
+def clear_gui(win: Union[ctk.CTk, ctk.CTkToplevel]) -> None:
     """
-    Clears all stuff inside a window
+    Clears all stuff inside a window/frame
     """
     for widget in win.winfo_children():
         widget.quit()
-    f.dbg(f"Cleared window {win.winfo_name()}")
+    f.dbg(f"Cleared window/frame {win.winfo_name()}")
     
-def clear_frame(frame: ctk.CTkFrame) -> None:
+def common_next() -> None:
     """
-    Clears all widgets inside the given frame.
+    A common 'next' function for shared.main_app
+    This function clears the window and prepares it
+    for the next function using it.
     """
-    for widget in frame.winfo_children(): # type: ignore
-        widget.destroy() # type: ignore
-    f.dbg(f"Cleared frame {frame.winfo_name()}")
+    clear_gui(shared.main_app.main)
+    shared.main_app.main.quit()
+    shared.main_app.main.destroy()
     
 # ---[ Window classes ]--- #
 class app:
@@ -129,22 +131,22 @@ class app:
         )
         self.main.grid(row=0, column=0, sticky="nsew") # type: ignore
         self.main.pack_propagate(False)  # Prevent content from shrinking the frame
-        
-        # Banner and action bar
-        self.banner_frame = Banner(self.main, "Placeholder", "Edit these text using '.banner()'")
         f.dbg(f"Initialized new app with title: '{title}'")
     
     def banner(self, heading: str = "", text: str = "") -> None:
         """
-        Edits the banner text and subtext the main window.
+        Adds/Re-adds the banner frame with text
         
         Args:
             heading (str): The heading text for the banner.
             text (str): The subtext for the banner.
         """
-        self.banner_frame.label_heading.configure(text=heading)
-        self.banner_frame.label_text.configure(text=text)
-        f.dbg(f"Updated banner with heading: '{heading}' and text: '{text}'")
+        if hasattr(self, "banner_frame") and self.banner_frame:
+            self.banner_frame.frame.grid_forget()
+            self.banner_frame.frame.quit()
+            self.banner_frame.frame.destroy()
+        
+        self.banner_frame = Banner(self.main, heading, text)
         
     def action_bar(self, buttons: tuple[tuple[str, Callable[[], None]], ...]) -> None:
         """
@@ -154,8 +156,9 @@ class app:
             buttons (tuple[tuple[str, Callable[[], None]], ...]): A tuple of button text and command pairs.
         """
         if hasattr(self, "action_bar_frame") and self.action_bar_frame:
-            self.action_bar_frame.grid_forget()  # Remove the old action bar if it exists
-            self.action_bar_frame.destroy()  # Destroy the old action bar frame if it exists
+            self.action_bar_frame.frame.grid_forget()  # Remove the old action bar if it exists
+            self.action_bar_frame.frame.quit()
+            self.action_bar_frame.frame.destroy()  # Destroy the old action bar frame if it exists
         
         self.action_bar_frame = ActionBar(self.root, buttons)
         self.buttons = self.action_bar_frame.button_refs
