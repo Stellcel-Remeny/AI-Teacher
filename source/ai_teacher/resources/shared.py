@@ -8,6 +8,8 @@ global config, config_file, app_dir, version, init_time, init_time_formatted, bu
 global user_dir
 
 # ---[ Stuff needed to declare type ]--- #
+from ai_teacher.gui.gui import app
+
 from configparser import ConfigParser
 from datetime import datetime
 from customtkinter import CTk # type: ignore
@@ -19,6 +21,7 @@ user_config: ConfigParser = ConfigParser()
 init_time_formatted: datetime | None = None
 
 root_app: CTk | None = None
+main_app: app | None = None
 
 debug: bool = False
 log: bool = False
