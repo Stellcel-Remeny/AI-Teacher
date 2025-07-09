@@ -15,8 +15,8 @@ import tkinter as tk
 def main():
     f.init()
     # Window initialization
-    win = gui.gui.app() # Our main application window
-    gui.camera.init(win)  # Start mediapipe and the user webcam
+    shared.main_app = gui.gui.app() # Our main application window
+    gui.camera.camera_trainer()  # Start mediapipe and the user webcam
     f.dbg("Window is closed.")
     f.quit(0)
 
