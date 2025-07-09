@@ -5,6 +5,7 @@
 
 # ---[ Libraries ]--- #
 from ai_teacher.resources import shared
+from ai_teacher.gui import gui
 
 import os
 import sys
@@ -233,7 +234,6 @@ def init() -> None:
         logfile_name = os.path.join(logfile_directory, logfile_name)
     
     # Libraries (put here so shared variables are accessible)
-    from ai_teacher.gui import gui
     from ai_teacher.resources.notices import show_notices
     from ai_teacher.resources import sounds
     from ai_teacher.backend.login import login
