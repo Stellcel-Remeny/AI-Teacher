@@ -5,7 +5,6 @@
 
 # ---[ Libraries ]--- #
 from ai_teacher.resources import shared
-from ai_teacher.gui import gui
 
 import os
 import sys
@@ -73,7 +72,7 @@ def quit(return_code: int, text: str = "", dialog: bool = True) -> None:
         dbg(f"ERROR! RETURN CODE: {return_code}")
         dbg(f"Error message: {text}")
         print(f"An error occurred: {text}")
-        gui.error(text)
+        gui.error(f"{text}\nReturn code: {return_code}")
 
     # Print exit message
     dbg(f"Quitting with return code {return_code}")
@@ -121,10 +120,40 @@ def update_ini(ini_file: str, section: str, key: str, value: str) -> None:
     updater.read(ini_file) # type: ignore
 
     if not updater.has_section(section): # type: ignore
-        updater.add_section(section)
+        updater.add_section(str(section))
 
     updater[section][key] = value
     updater.update_file()
+    
+def update_config(section: str, key: str, value: str) -> None:
+    """
+    This function updates the main 'configuration.ini' file
+    stored in shared.config_file as well as the configuration
+    loaded in shared.config
+    """
+    update_ini(shared.config_file, section, key, value)
+    
+    # Update in-memory config
+    if not shared.config.has_section(section):
+        shared.config.add_section(str(section))
+    
+    shared.config[section][key] = str(value)
+    return
+    
+def update_user_config(section: str, key: str, value: str) -> None:
+    """
+    This function updates the user's configuration ini file
+    stored in shared.user_config_file as well as the user 
+    configuration loaded in shared.user_config
+    """
+    update_ini(shared.user_config_file, section, key, value)
+    
+    # Update in-memory config
+    if not shared.user_config.has_section(section):
+        shared.user_config.add_section(str(section))
+    
+    shared.user_config[section][key] = str(value)
+    return
 
 def display_version() -> None:
     shared.build_number = str(int(shared.config.get('Version', 'build', fallback='0')) + 1)
@@ -137,7 +166,7 @@ def display_version() -> None:
     print("\nRemeny AI Teacher")
     print(f"Version {shared.version}\n")
     # Update build number
-    update_ini(shared.config_file, 'Version', 'build', shared.build_number)
+    update_config('Version', 'build', shared.build_number)
 
 def yesno(message: str) -> bool:
     """
@@ -182,44 +211,6 @@ def list_dirs(path: str) -> list[str]:
     except Exception as e:
         dbg(f"Error listing directories in {path}: {e}")
         return []
-        
-# ---[ User login ]--- #
-def login() -> bool:
-    # TODO: Add passwords
-    from ai_teacher.gui import login
-    shared.user_name, shared.user_dir = login.login_prompt()
-    shared.user_dir = os.path.join(shared.app_dir, "data", shared.user_dir)
-    dbg(f"The Chosen Username: {shared.user_name}")
-    dbg(f"The Chosen User Directory: {shared.user_dir}")
-    os.makedirs(shared.user_dir, exist_ok=True)
-    
-    if not os.path.isdir(shared.user_dir):
-        dbg(f"ERROR: Failed to create user directory at {shared.user_dir}")
-        return False
-        
-    shared.user_config_file = os.path.join(shared.user_dir, "settings.ini")
-    
-    if os.path.isfile(shared.user_config_file):
-        dbg(f"Loading user configuration from pre-existing settings.ini file")
-        shared.user_config = load_config(shared.user_config_file)
-    else:
-        default_config: str = os.path.join(shared.app_dir, "settings", "default.ini")
-        dbg(f"Loading default user configuration from '{default_config}'")
-        shared.user_config = load_config(default_config)
-        dbg(f"Writing default values to user configuration")
-        
-        with open (shared.user_config_file, 'w', encoding='utf-8') as f:
-            shared.user_config.write(f)
-            
-        dbg(f"Adding pretty name {shared.user_name}")
-        update_ini(shared.user_config_file, 'Account', 'pretty_name', shared.user_name)
-        dbg(f"Reloading to make sure changes are made")
-        shared.user_config.clear()
-        shared.user_config = load_config(shared.user_config_file)
-    
-    dbg(f"Logging in as {shared.user_name}")
-    dbg(f"User directory full path at: {shared.user_dir}")
-    return True
 
 # ---[ Init function ]--- #
 def init() -> None:
@@ -242,8 +233,10 @@ def init() -> None:
         logfile_name = os.path.join(logfile_directory, logfile_name)
     
     # Libraries (put here so shared variables are accessible)
+    from ai_teacher.gui import gui
     from ai_teacher.resources.notices import show_notices
     from ai_teacher.resources import sounds
+    from ai_teacher.backend.login import login
     
     clear_screen()
     display_version()
