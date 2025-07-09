@@ -4,15 +4,10 @@
 #
 
 # ---[ Libraries ]--- #
-from ai_teacher.resources import shared
-
 import pygame
 import os
 
 # ---[ Sound setup ]--- #
-# Directory
-sound_directory: str = os.path.join(shared.app_dir, "media", "sounds")
-
 # Filenames for sound (without path)
 # Define new sound filenames here
 #
@@ -28,6 +23,9 @@ sounds: dict[str, pygame.mixer.Sound] = {}
 
 # ---[ Init function for sound ]--- #
 def init() -> None:
+    from ai_teacher.resources import shared
+    # This variable contains directory path
+    sound_directory: str = os.path.join(shared.app_dir, "media", "sounds")
     try:
         pygame.mixer.init()
     except pygame.error as e:
