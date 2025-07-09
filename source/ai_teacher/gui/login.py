@@ -309,7 +309,7 @@ def display_login_prompt() -> str:
     selected_user_var = tk.StringVar()
     refresh_user_list(radio_frame, selected_user_var)
     
-    #run the main loop
+    # run the main loop
     login_window.mainloop()
     
     # Exit the login window
@@ -350,6 +350,9 @@ def login_prompt() -> tuple[str, str]:
     # Display a login window
     selected_user_name: str = ""
     selected_user_name = display_login_prompt()
+    
+    if not selected_user_name:
+        f.quit(1, "Apparently selected_user_name is empty, how can I log in?")
     
     # Match the selected user name with our index
     index: int = 0
