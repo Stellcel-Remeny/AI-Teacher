@@ -23,7 +23,7 @@ def show_disclaimer(disclaimer_text: str) -> None:
         print("Closing due to user not accepting the disclaimer...")
         f.quit(1,"You must accept the disclaimer to continue.")
         
-    f.update_ini(shared.user_config_file, 'Main', 'disclaimer_accepted', 'true')
+    f.update_user_config('Main', 'disclaimer_accepted', 'true')
 
 def show_license(license_text: str) -> None:
     """
@@ -37,7 +37,7 @@ def show_license(license_text: str) -> None:
             print("Closing due to user not accepting the license mentioned above...")
             f.quit(1, "You must accept the license to continue.")
         
-        f.update_ini(shared.user_config_file, 'Main', 'license_accepted', 'true')
+        f.update_user_config('Main', 'license_accepted', 'true')
         
 def show_notices(disclaimer_file: str, license_name: str) -> None:
     """

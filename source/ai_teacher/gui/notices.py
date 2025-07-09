@@ -21,8 +21,12 @@ def show_notices_gui(disclaimer_text: str,
         Action for the 'Next' button, which closes the window.
         """
         # Save the acceptance state
-        f.update_ini(shared.user_config_file, 'Main', 'disclaimer_accepted', str(disclaimer_checkbox.get()).lower())
-        f.update_ini(shared.user_config_file, 'Main', 'license_accepted', str(license_checkbox.get()).lower())
+        f.update_user_config('Main',
+                             'disclaimer_accepted',
+                             str(disclaimer_checkbox.get()).lower())
+        f.update_user_config('Main',
+                             'license_accepted',
+                             str(license_checkbox.get()).lower())
         
         win.root.quit()
         win.root.destroy()
