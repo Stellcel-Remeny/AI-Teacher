@@ -7,6 +7,7 @@
 from ai_teacher.resources import functions as f
 from ai_teacher.resources import shared
 from typing import Union
+
 import cv2
 import platform
 
@@ -108,7 +109,7 @@ def capture_face_points(left_eye: list[float], right_eye: list[float], nose: lis
     for name, coords in points.items():
         f.dbg(name.upper(), coords)
         for axis, value in zip('xyz', coords):
-            f.update_ini(shared.user_config_file, 'Facemarks', f"{key}_{name}_{axis}", value)
+            f.update_user_config('Facemarks', f"{key}_{name}_{axis}", value)
     
     user_instruction_count += 1
     return user_instructions[user_instruction_count]
