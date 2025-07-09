@@ -7,7 +7,7 @@
 from ai_teacher.resources import functions as f
 from ai_teacher.resources import shared
 from ai_teacher.resources.sounds import sounds
-from ai_teacher.backend import camera_backend
+from ai_teacher.backend import camera as camera_backend
 from ai_teacher.gui import gui
 
 from PIL import Image, ImageTk # type: ignore
@@ -31,9 +31,9 @@ latest_face_points = {
     "right_iris": None
 }
 
-def init(win: "gui.app") -> None:
+def camera_trainer() -> None:
     """
-    This function shows camera window
+    This function shows camera window.
     """
     instruction_updated: bool = False
     
@@ -53,9 +53,10 @@ def init(win: "gui.app") -> None:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
     # Basic window init
+    win = shared.main_app
     win.root.title("Remeny AI Teacher - Camera Trainer")
     win.banner("Camera calibrator", "Select a camera and train the machine to know where you are looking.")
-    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.not_implemented)))
+    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.common_next)))
     win.buttons["Next"].configure(state="disabled")
     
     # Populate the camera combobox
@@ -160,7 +161,7 @@ def init(win: "gui.app") -> None:
     
     instruction_label.configure(text="Please select a camera from above.\nAfter selecting, instructions will appear here. For capture button, scroll down.")
     
-    win.root.mainloop()
+    win.main.mainloop()
 
 def open_face_track(image_label: "ctk.CTkLabel",
                     camera_index: int,
