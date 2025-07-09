@@ -70,12 +70,12 @@ def quit() -> None:
 def not_implemented() -> None:
     messagebox.showinfo("Not Implemented Yet", "This feature is not implemented yet.") # type: ignore
 
-def clear_gui(win: Union[ctk.CTk, ctk.CTkToplevel]) -> None:
+def clear_gui(win: Union[ctk.CTk, ctk.CTkToplevel, ctk.CTkFrame, ctk.CTkScrollableFrame]) -> None:
     """
     Clears all stuff inside a window/frame
     """
     for widget in win.winfo_children():
-        widget.quit()
+        widget.destroy()
     f.dbg(f"Cleared window/frame {win.winfo_name()}")
     
 def common_next() -> None:
