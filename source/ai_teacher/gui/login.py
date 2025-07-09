@@ -177,7 +177,7 @@ def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar
     f.dbg(f"User directories: {user_directories}")
 
     # Clear all old radio buttons from frame
-    gui.clear_frame(radio_frame)
+    gui.clear_gui(radio_frame)
 
     # Create new radio buttons
     for i, user_name in enumerate(user_names):
@@ -358,6 +358,6 @@ def login_prompt() -> tuple[str, str]:
     try:
         index = user_names.index(selected_user_name)
     except ValueError:
-        gui.error(f"User '{selected_user_name}' not found in user list!")
+        f.quit(1, f"User '{selected_user_name}' not found in user list!")
 
     return selected_user_name, user_directories[index]
