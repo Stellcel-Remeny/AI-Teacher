@@ -30,9 +30,11 @@ init_time: float = 0.0
 
 build_number: int = 0
 
+session_type: str = ""
 config_file: str = ""
 user_config_file: str = ""
-app_dir: str = ""
-version: str = ""
 user_name: str = ""
 user_dir: str = ""
+
+app_dir: str = ""
+version: str = "<UNKNOWN>"
