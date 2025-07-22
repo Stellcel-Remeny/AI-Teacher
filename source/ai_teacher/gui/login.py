@@ -169,33 +169,13 @@ def create_user(enable_back_button: bool = False) -> bool | None:
     window.destroy()
     f.dbg(f"User creation window Return Val: {return_value}")
     return return_value
-    
+
 def refresh_user_list(radio_frame: ctk.CTkFrame, selected_user_var: tk.StringVar) -> None:
     global user_names, user_directories
     f.dbg("Refreshing user list")
     f.dbg(f"User names: {user_names}")
     f.dbg(f"User directories: {user_directories}")
-
-    # Clear all old radio buttons from frame
-    gui.clear_gui(radio_frame)
-
-    # Create new radio buttons
-    for i, user_name in enumerate(user_names):
-        radio = ctk.CTkRadioButton(
-            master=radio_frame,
-            text=user_name,
-            variable=selected_user_var,
-            value=user_name,
-            text_color="#000000",
-            font=("Arial", 14),
-            fg_color="#949494",
-            hover_color="#666666",
-            radiobutton_height=20,
-            radiobutton_width=20,
-            border_color="#000000"
-        )
-        radio.pack(anchor="w", pady=5, padx=10) # type: ignore
-        f.dbg(f"User {i} is '{user_name}' with directory '{user_directories[i]}'")
+    gui.create_list_radio_buttons(radio_frame, selected_user_var, user_names)
     
 def display_login_prompt() -> str:
     """
@@ -364,3 +344,41 @@ def login_prompt() -> tuple[str, str]:
         f.quit(1, f"User '{selected_user_name}' not found in user list!")
 
     return selected_user_name, user_directories[index]
+
+def ask_session(win: gui.app) -> str:
+    """
+    Opens a simple GUI dialog asking the user to select a session type.
+
+    Returns:
+        str: The user-selected session type as a string.
+    """
+    session_types: dict = {
+        "basic": "Basic AI Text CHAT",
+        "live_text_only" : "Live text chat (like WhatsApp) - Short messages",
+        "live_speech": "Live text + speech & voice recognition",
+        "video_no_camera": "Video chat without camera",
+        "video_with_camera": "Video chat with camera"
+    }
+    display_names: list = list(session_types.values())
+    
+    win.root.title("Remeny AI Teacher - Session Type")
+    win.banner(f"Welcome, {shared.user_name}", "Select a session type to use the AI Teacher.")
+    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.common_next)))
+    win.buttons["Next"].configure(state="disabled")
+
+    # Frame to hold radio buttons
+    radio_frame = ctk.CTkFrame(master=win.main, fg_color="#FFFFFF", width=300, height=200)
+    radio_frame.grid(padx=60, pady=60)
+
+    # List users
+    option: ctk.StringVar = ctk.StringVar()
+    gui.create_list_radio_buttons(radio_frame, option, display_names)
+
+    #run the main loop
+    win.main.mainloop()
+    
+    if option not in session_types:
+        f.quit("Invalid session type. Quitting.")
+        return
+    
+    return option
