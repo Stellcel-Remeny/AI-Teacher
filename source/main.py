@@ -26,6 +26,7 @@ def main():
     show_notices(f"{shared.app_dir}/text/DISCLAIMER.txt", "GPLv3")
     shared.main_app = gui.gui.app() # Our main application window
     shared.session_type = gui.login.ask_session(shared.main_app)
+    f.dbg(f"Session type: {shared.session_type}")
     
     # Camera trainer
     gui.camera.camera_trainer(shared.main_app)  # Start mediapipe and the user webcam
