@@ -11,6 +11,7 @@ from tkinter import messagebox
 from typing import Callable
 from typing import Union
 
+import tkinter as tk
 import customtkinter as ctk # type: ignore
 import os
 import platform
@@ -46,11 +47,22 @@ def warn(msg: str, title: str = "Warning!") -> None:
     Display a warning
     
     Args:
-        msg (str): The error message to display.
-        title (str = "Error"): Window title
+        msg (str): The warning message to display.
+        title (str = "Warning!"): Window title
     """
     f.dbg(f"Warning: {msg}")
     messagebox.showwarning(title, f"Warning: {msg}") # type: ignore
+    
+def info(msg: str, title: str = "Information o.O") -> None:
+    """
+    Display an info window
+    
+    Args:
+        msg (str): The information message to display.
+        title (str = "Information o.O"): Window title
+    """
+    f.dbg(f"Information: {msg}")
+    messagebox.showinfo(title, f"{msg}") # type: ignore
     
 def quit() -> None:
     """
@@ -87,6 +99,25 @@ def common_next() -> None:
     clear_gui(shared.main_app.main)
     shared.main_app.main.quit()
     shared.main_app.main.destroy()
+    
+def create_list_radio_buttons(radio_frame: ctk.CTkFrame, selected_var: tk.StringVar, names: list[str]) -> None:
+    clear_gui(radio_frame)
+    for i, name in enumerate(names):
+        radio = ctk.CTkRadioButton(
+            master=radio_frame,
+            text=name,
+            variable=selected_var,
+            value=name,
+            text_color="#000000",
+            font=("Arial", 14),
+            bg_color="transparent",
+            hover_color="#555555",
+            radiobutton_height=20,
+            radiobutton_width=20,
+            border_color="#000000",
+            corner_radius=500,
+        )
+        radio.pack(anchor="w", pady=5, padx=10)  # type: ignore
     
 # ---[ Window classes ]--- #
 class app:
