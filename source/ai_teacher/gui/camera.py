@@ -31,7 +31,7 @@ latest_face_points = {
     "right_iris": None
 }
 
-def camera_trainer() -> None:
+def camera_trainer(win: gui.app) -> None:
     """
     This function shows camera window.
     """
@@ -53,7 +53,6 @@ def camera_trainer() -> None:
             f.quit(1, f"Selected camera '{cam_name}' not found.")
     
     # Basic window init
-    win = shared.main_app
     win.root.title("Remeny AI Teacher - Camera Trainer")
     win.banner("Camera calibrator", "Select a camera and train the machine to know where you are looking.")
     win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.common_next)))
