@@ -10,7 +10,7 @@ from ai_teacher.gui import login as gui_login
 import os
 
 # ---[ Functions ]---- #
-def login() -> bool:
+def login():
     #
     # This function logs in a user
     #
@@ -21,10 +21,6 @@ def login() -> bool:
     f.dbg(f"The Chosen Username: {shared.user_name}")
     f.dbg(f"The Chosen User Directory: {shared.user_dir}")
     os.makedirs(shared.user_dir, exist_ok=True)
-    
-    if not os.path.isdir(shared.user_dir):
-        f.dbg(f"ERROR: Failed to create user directory at {shared.user_dir}")
-        return False
         
     shared.user_config_file = os.path.join(shared.user_dir, "settings.ini")
     
@@ -48,4 +44,4 @@ def login() -> bool:
     
     f.dbg(f"Logging in as {shared.user_name}")
     f.dbg(f"User directory full path at: {shared.user_dir}")
-    return True
+    return
