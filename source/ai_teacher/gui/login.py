@@ -348,6 +348,7 @@ def login_prompt() -> tuple[str, str]:
 def ask_session(win: gui.app) -> str:
     """
     Opens a simple GUI dialog asking the user to select a session type.
+    Requires parent window.
 
     Returns:
         str: The user-selected session type as a string.
@@ -360,25 +361,47 @@ def ask_session(win: gui.app) -> str:
         "video_with_camera": "Video chat with camera"
     }
     display_names: list = list(session_types.values())
+    selected_option: ctk.StringVar = ctk.StringVar()
+    session_type_to_return: str = ""
+    
+    def on_next():
+        nonlocal session_type_to_return
+        selected_option_text = selected_option.get()
+        session_type = next((k for k, v in session_types.items() if v == selected_option_text), None)
+        
+        if session_type is None:
+            raise ValueError("Invalid session type selected (not found in dictionary).")
+        
+        # Convert to list for index
+        session_keys = list(session_types.keys())
+        index = session_keys.index(session_type) 
+        
+        if 0 < index < 5:
+            gui.not_implemented()
+        else:
+            session_type_to_return = session_type
+            gui.common_next()
     
     win.root.title("Remeny AI Teacher - Session Type")
     win.banner(f"Welcome, {shared.user_name}", "Select a session type to use the AI Teacher.")
-    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", gui.common_next)))
+    win.action_bar(buttons=(("Cancel", gui.quit), ("Next", on_next)))
     win.buttons["Next"].configure(state="disabled")
 
     # Frame to hold radio buttons
     radio_frame = ctk.CTkFrame(master=win.main, fg_color="#FFFFFF", width=300, height=200)
     radio_frame.grid(padx=60, pady=60)
+    
+    def on_session_button_select():
+        win.buttons['Next'].configure(state="normal")
+        return
 
     # List users
-    option: ctk.StringVar = ctk.StringVar()
-    gui.create_list_radio_buttons(radio_frame, option, display_names)
+    gui.create_list_radio_buttons(radio_frame, selected_option, display_names, on_select=on_session_button_select)
 
     #run the main loop
     win.main.mainloop()
     
-    if option not in session_types:
-        f.quit("Invalid session type. Quitting.")
-        return
-    
-    return option
+    if not session_type_to_return or session_type_to_return not in session_types:
+        raise ValueError("Invalid session type. Something went wrong terribly. Quitting.")
+    else:
+        return session_type_to_return
