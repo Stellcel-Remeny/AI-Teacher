@@ -4,19 +4,31 @@
 #
 
 # ---[ Libraries ]--- #
+import os
+import sys
+import tkinter as tk
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+
 from ai_teacher.resources import shared
 from ai_teacher.resources import functions as f
 from ai_teacher import gui
 
-import sys
-import tkinter as tk
-
-# ---[ Main Initialization ]--- #
+# ---[ Main Program Entry ]--- #
 def main():
+    # Early init
     f.init()
-    # Window initialization
+    # Login, license and session type
+    from ai_teacher.backend.login import login
+    from ai_teacher.resources.notices import show_notices
+    
+    login()   
+    show_notices(f"{shared.app_dir}/text/DISCLAIMER.txt", "GPLv3")
     shared.main_app = gui.gui.app() # Our main application window
-    gui.camera.camera_trainer()  # Start mediapipe and the user webcam
+    shared.session_type = gui.login.ask_session(shared.main_app)
+    
+    # Camera trainer
+    gui.camera.camera_trainer(shared.main_app)  # Start mediapipe and the user webcam
     f.dbg("Window is closed.")
     f.quit(0)
 
