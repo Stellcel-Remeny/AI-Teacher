@@ -98,11 +98,16 @@ def common_next() -> None:
     """
     clear_gui(shared.main_app.main)
     shared.main_app.main.quit()
-    shared.main_app.main.destroy()
     
-def create_list_radio_buttons(radio_frame: ctk.CTkFrame, selected_var: tk.StringVar, names: list[str]) -> None:
+def create_list_radio_buttons(
+    radio_frame: ctk.CTkFrame,
+    selected_var: tk.StringVar,
+    names: list[str],
+    on_select: callable = None  # Callback function when user selects
+) -> None:
     clear_gui(radio_frame)
-    for i, name in enumerate(names):
+
+    for name in names:
         radio = ctk.CTkRadioButton(
             master=radio_frame,
             text=name,
@@ -116,8 +121,9 @@ def create_list_radio_buttons(radio_frame: ctk.CTkFrame, selected_var: tk.String
             radiobutton_width=20,
             border_color="#000000",
             corner_radius=500,
+            command=lambda: on_select() if on_select else None
         )
-        radio.pack(anchor="w", pady=5, padx=10)  # type: ignore
+        radio.pack(anchor="w", pady=5, padx=10)
     
 # ---[ Window classes ]--- #
 class app:
@@ -172,10 +178,11 @@ class app:
             heading (str): The heading text for the banner.
             text (str): The subtext for the banner.
         """
-        if hasattr(self, "banner_frame") and self.banner_frame:
+        try:
             self.banner_frame.frame.grid_forget()
-            self.banner_frame.frame.quit()
             self.banner_frame.frame.destroy()
+        except Exception:
+            pass
         
         self.banner_frame = Banner(self.main, heading, text)
         
