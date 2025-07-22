@@ -54,35 +54,26 @@ def quit(return_code: int, text: str = "", dialog: bool = True) -> None:
     """
     This function quits the program with a given return code.
     """
-    # Quit root_app if it exists and quick_exit is true
-    # Why? Sometimes if an error is shown, the background GUI will
-    # still function. So if this option is enabled, we will close the GUI
-    if shared.config.getboolean('GUI', 'quick_exit', fallback=True):
+    if shared.config.getboolean('GUI', 'quick_exit', fallback=True) and shared.root_app:
+        from tkinter import TclError
         try:
-            if shared.root_app and shared.root_app.winfo_exists():
-                try:
-                    shared.root_app.destroy()
-                except Exception as e:
-                    dbg(f"Error destroying root_app: {e}")
-                    return_code = 1
-        except Exception:
-            pass  # window already destroyed
-    
-    # Display error dialog if return_code != 0:
+            shared.root_app.quit()  # Stop mainloop
+            shared.root_app.after(100, shared.root_app.destroy)  # Let pending events finish
+        except (TclError, RuntimeError):
+            pass
+
     if return_code != 0 and dialog:
         dbg(f"ERROR! RETURN CODE: {return_code}")
         dbg(f"Error message: {text}")
         print(f"An error occurred: {text}")
         gui.error(f"{text}\nReturn code: {return_code}")
 
-    # Print exit message
     dbg(f"Quitting with return code {return_code}")
     print("Exiting...")
-    
-    # Print session information
+
     dbg(f"Session {shared.build_number} lasted from {shared.init_time_formatted} to {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     dbg("Program exited after running for {:.1f} seconds".format(time.time() - shared.init_time))
-    exit(return_code)
+    sys.exit(return_code)
 
 # ---[ Secondary Functions ]--- #
 def clear_screen():
@@ -234,24 +225,15 @@ def init() -> None:
         logfile_name = os.path.join(logfile_directory, logfile_name)
     
     # Libraries (put here so shared variables are accessible)
-    from ai_teacher.resources.notices import show_notices
-    from ai_teacher.resources import sounds
-    from ai_teacher.backend.login import login
+    from ai_teacher.resources.sounds import init as sound_init
     
     clear_screen()
     display_version()
-    
-    try:
-        sounds.init()
-    except Exception as e:
-        quit(1, e)
+
+    sound_init()
     
     create_folders()
     gui.init()
-    
-    if not login():
-        quit(1, "Login failure.")
-    
-    show_notices(f"{shared.app_dir}/text/DISCLAIMER.txt", "GPLv3")
+
     dbg("Initialization complete.")
     return
